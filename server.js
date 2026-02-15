@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const crypto = require('crypto');
 const triviaQuestions = require('./questions.json');
 const aboutYouQuestions = require('./questions-aboutyou.json');
 
@@ -15,7 +16,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 3000;
 
 // ── Data structures ──────────────────────────────────────────────────
-const rooms = new Map(); // roomCode → Room
+const rooms = new Map();          // roomCode → Room
+const tokenToRoom = new Map();    // playerToken → { roomCode, socketId }
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -26,26 +28,38 @@ function generateCode() {
   return code;
 }
 
+function generateToken() {
+  return crypto.randomBytes(12).toString('hex');
+}
+
+const avatarColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8C42', '#98D8C8'];
+
 function createRoom(hostSocketId) {
   const code = generateCode();
   const room = {
     code,
     hostId: hostSocketId,
-    mode: 'classic',       // classic | fanfacts | aboutyou
-    phase: 'lobby',        // lobby | collect-facts | writing | voting | reveal | aboutyou-vote | aboutyou-reveal | gameover
-    players: new Map(),
+    mode: 'classic',
+    // Phases: lobby | collect-facts | category-select | writing | voting | reveal
+    //         | aboutyou-vote | aboutyou-reveal | gameover
+    phase: 'lobby',
+    players: new Map(),       // socketId → PlayerData
+    playerOrder: [],          // array of socketIds for captain rotation
+    captainIndex: 0,          // who picks category this round
     round: 0,
     totalRounds: 8,
     questions: [],
+    questionPool: [],         // unused questions grouped by category
     currentQuestion: null,
+    categoryChoices: [],      // 3 categories to choose from
     options: [],
     votes: new Map(),
     truthIndex: -1,
+    isFinalRound: false,
+    scoreMultiplier: 1,
     // Fan Facts
-    fanFacts: new Map(),        // socketId → { fact, used }
+    fanFacts: new Map(),
     currentFactOwnerId: null,
-    // About You
-    aboutYouTarget: null,       // the player name being asked about
   };
   rooms.set(code, room);
   return room;
@@ -56,16 +70,46 @@ function normalize(str) {
   return str.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-const avatarColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8C42', '#98D8C8'];
-
 function getPlayers(room) {
   const players = [];
   room.players.forEach((p, id) => {
-    players.push({ id, name: p.name, score: p.score, avatar: p.avatar });
+    players.push({ id, name: p.name, score: p.score, avatar: p.avatar, connected: p.connected });
   });
   return players;
 }
 
+function getCaptainName(room) {
+  if (room.playerOrder.length === 0) return null;
+  const captainId = room.playerOrder[room.captainIndex % room.playerOrder.length];
+  const captain = room.players.get(captainId);
+  return captain ? captain.name : null;
+}
+
+// ── Category logic ───────────────────────────────────────────────────
+function buildQuestionPool(room) {
+  const shuffled = [...triviaQuestions].sort(() => Math.random() - 0.5);
+  const pool = {};
+  shuffled.forEach(q => {
+    if (!pool[q.category]) pool[q.category] = [];
+    pool[q.category].push(q);
+  });
+  room.questionPool = pool;
+}
+
+function pickCategoryChoices(room) {
+  const available = Object.keys(room.questionPool).filter(cat => room.questionPool[cat].length > 0);
+  // pick up to 3 random categories
+  const shuffled = available.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(3, shuffled.length));
+}
+
+function pickQuestionFromCategory(room, category) {
+  const pool = room.questionPool[category];
+  if (!pool || pool.length === 0) return null;
+  return pool.shift(); // take the first question of that category
+}
+
+// ── Broadcast ────────────────────────────────────────────────────────
 function broadcastState(room) {
   const players = getPlayers(room);
   const base = {
@@ -75,10 +119,11 @@ function broadcastState(room) {
     players,
     round: room.round,
     totalRounds: room.totalRounds,
+    isFinalRound: room.isFinalRound,
   };
 
-  // ── TV data ──────────────────────────────
   let tvData = { ...base };
+
   switch (room.phase) {
     case 'lobby':
       tvData.message = 'Waiting for players…';
@@ -95,10 +140,16 @@ function broadcastState(room) {
       break;
     }
 
+    case 'category-select':
+      tvData.categories = room.categoryChoices;
+      tvData.captainName = getCaptainName(room);
+      break;
+
     case 'writing': {
       const submitted = [];
       room.players.forEach(p => { if (p.lie !== null) submitted.push(p.name); });
       tvData.prompt = room.currentQuestion.prompt;
+      tvData.category = room.currentQuestion.category;
       tvData.submitted = submitted;
       tvData.total = room.mode === 'fanfacts'
         ? Array.from(room.players.values()).filter(p => p.name !== room.currentQuestion.ownerName).length
@@ -109,23 +160,23 @@ function broadcastState(room) {
 
     case 'voting':
       tvData.prompt = room.currentQuestion.prompt;
+      tvData.category = room.currentQuestion.category;
       tvData.options = room.options.map(o => o.text);
       if (room.mode === 'fanfacts') tvData.factOwner = room.currentQuestion.ownerName;
       break;
 
-    case 'reveal': {
+    case 'reveal':
       tvData.prompt = room.currentQuestion.prompt;
+      tvData.category = room.currentQuestion.category;
       tvData.results = buildRevealResults(room);
       tvData.truthIndex = room.truthIndex;
       if (room.mode === 'fanfacts') tvData.factOwner = room.currentQuestion.ownerName;
       break;
-    }
 
-    case 'aboutyou-vote': {
+    case 'aboutyou-vote':
       tvData.prompt = room.currentQuestion.prompt;
       tvData.options = players.map(p => p.name);
       break;
-    }
 
     case 'aboutyou-reveal': {
       tvData.prompt = room.currentQuestion.prompt;
@@ -145,22 +196,30 @@ function broadcastState(room) {
 
   io.to(room.hostId).emit('state-update', tvData);
 
-  // ── Controller data (personalized) ──────
+  // ── Per-player controller data ──
   room.players.forEach((player, socketId) => {
+    if (!player.connected) return; // skip disconnected players
     let cd = { ...base, you: player.name, yourScore: player.score };
+    const isCaptain = room.playerOrder[room.captainIndex % room.playerOrder.length] === socketId;
 
     switch (room.phase) {
       case 'collect-facts':
         cd.submitted = room.fanFacts.has(socketId);
         break;
 
+      case 'category-select':
+        cd.isCaptain = isCaptain;
+        cd.categories = isCaptain ? room.categoryChoices : [];
+        cd.captainName = getCaptainName(room);
+        break;
+
       case 'writing':
         cd.prompt = room.currentQuestion.prompt;
+        cd.category = room.currentQuestion.category;
         cd.submitted = player.lie !== null;
-        // In Fan Facts, the fact owner doesn't write
         if (room.mode === 'fanfacts' && socketId === room.currentFactOwnerId) {
           cd.isFactOwner = true;
-          cd.submitted = true; // skip writing
+          cd.submitted = true;
         }
         break;
 
@@ -205,6 +264,7 @@ function buildRevealResults(room) {
     text: opt.text,
     isTruth: idx === room.truthIndex,
     author: opt.author,
+    isLieForMe: opt.isLieForMe || false,
     voters: (room.votes.get(idx) || []).map(id => {
       const p = room.players.get(id);
       return p ? p.name : '?';
@@ -215,10 +275,9 @@ function buildRevealResults(room) {
 // ── Game logic ───────────────────────────────────────────────────────
 function prepareQuestions(room) {
   if (room.mode === 'classic') {
-    room.questions = [...triviaQuestions].sort(() => Math.random() - 0.5);
-    room.totalRounds = Math.min(room.questions.length, 8);
+    buildQuestionPool(room);
+    room.totalRounds = 8;
   } else if (room.mode === 'fanfacts') {
-    // questions built from collected facts
     const facts = [];
     room.fanFacts.forEach((f, id) => {
       const p = room.players.get(id);
@@ -228,6 +287,8 @@ function prepareQuestions(room) {
           truth: f.fact,
           ownerId: id,
           ownerName: p.name,
+          category: 'Fan Facts',
+          decoys: [],
         });
       }
     });
@@ -240,30 +301,50 @@ function prepareQuestions(room) {
 }
 
 function startRound(room) {
-  room.currentQuestion = room.questions[room.round];
   room.options = [];
   room.votes = new Map();
   room.truthIndex = -1;
-  room.players.forEach(p => { p.lie = null; p.vote = null; });
+  room.players.forEach(p => { p.lie = null; p.vote = null; p.usedLieForMe = false; });
+
+  // Final round check (last round = triple points)
+  room.isFinalRound = (room.round === room.totalRounds - 1) && room.mode === 'classic';
+  room.scoreMultiplier = room.isFinalRound ? 3 : 1;
 
   if (room.mode === 'aboutyou') {
+    room.currentQuestion = room.questions[room.round];
     room.phase = 'aboutyou-vote';
-  } else {
+    broadcastState(room);
+  } else if (room.mode === 'fanfacts') {
+    room.currentQuestion = room.questions[room.round];
+    room.currentFactOwnerId = room.currentQuestion.ownerId;
     room.phase = 'writing';
-    if (room.mode === 'fanfacts') {
-      room.currentFactOwnerId = room.currentQuestion.ownerId;
+    broadcastState(room);
+  } else {
+    // Classic: captain picks a category
+    room.categoryChoices = pickCategoryChoices(room);
+    if (room.categoryChoices.length === 0) {
+      // no more categories — end the game
+      room.phase = 'gameover';
+      broadcastState(room);
+      return;
     }
+    room.phase = 'category-select';
+    broadcastState(room);
   }
+}
+
+function beginWritingPhase(room, question) {
+  room.currentQuestion = question;
+  room.phase = 'writing';
   broadcastState(room);
 }
 
 function buildVotingOptions(room) {
   const opts = [];
   room.players.forEach((p, id) => {
-    if (p.lie) opts.push({ text: p.lie, author: p.name, authorId: id });
+    if (p.lie) opts.push({ text: p.lie, author: p.name, authorId: id, isLieForMe: p.usedLieForMe });
   });
   opts.push({ text: room.currentQuestion.truth, author: '✦ TRUTH', authorId: null });
-  // shuffle
   for (let i = opts.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [opts[i], opts[j]] = [opts[j], opts[i]];
@@ -273,45 +354,63 @@ function buildVotingOptions(room) {
 }
 
 function calculateScoresForRound(room) {
-  // +1000 for guessing the truth
+  const m = room.scoreMultiplier;
+  // +1000 for guessing truth
   room.votes.forEach((voterIds, optIdx) => {
     if (optIdx === room.truthIndex) {
       voterIds.forEach(id => {
         const p = room.players.get(id);
-        if (p) p.score += 1000;
+        if (p) p.score += 1000 * m;
       });
     }
   });
-  // +500 for each player fooled by your lie
+  // +500 for each player fooled (half if "Lie for Me" was used)
   room.options.forEach((opt, idx) => {
     if (opt.authorId && idx !== room.truthIndex) {
       const fooled = (room.votes.get(idx) || []).length;
       const author = room.players.get(opt.authorId);
-      if (author) author.score += fooled * 500;
+      if (author) {
+        const points = opt.isLieForMe ? 250 : 500;
+        author.score += fooled * points * m;
+      }
     }
   });
 }
 
 function calculateAboutYouScores(room) {
-  // Find the most-voted answer — everyone who picked it gets 500 pts (consensus bonus)
   let maxVotes = 0;
   let topAnswer = null;
   room.votes.forEach((voterIds, targetName) => {
     if (voterIds.length > maxVotes) { maxVotes = voterIds.length; topAnswer = targetName; }
   });
   if (topAnswer && maxVotes > 1) {
-    const voterIds = room.votes.get(topAnswer) || [];
-    voterIds.forEach(id => {
+    (room.votes.get(topAnswer) || []).forEach(id => {
       const p = room.players.get(id);
       if (p) p.score += 500;
     });
   }
 }
 
+function checkAllSubmitted(room) {
+  let allSubmitted = true;
+  room.players.forEach((p, id) => {
+    if (room.mode === 'fanfacts' && id === room.currentFactOwnerId) return;
+    if (p.lie === null) allSubmitted = false;
+  });
+  return allSubmitted;
+}
+
+function checkAllVoted(room) {
+  let allVoted = true;
+  room.players.forEach(p => { if (p.vote === null) allVoted = false; });
+  return allVoted;
+}
+
 // ── Socket.io ────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
   let currentRoom = null;
 
+  // ── CREATE ROOM ──────────────────────────────────
   socket.on('create-room', () => {
     const room = createRoom(socket.id);
     currentRoom = room.code;
@@ -319,10 +418,41 @@ io.on('connection', (socket) => {
     broadcastState(room);
   });
 
-  socket.on('join-room', ({ code, name }) => {
+  // ── JOIN ROOM ────────────────────────────────────
+  socket.on('join-room', ({ code, name, token }) => {
     const roomCode = (code || '').toUpperCase().trim();
     const room = rooms.get(roomCode);
     if (!room) return socket.emit('error-msg', 'Room not found.');
+
+    // ── Reconnection with token ──
+    if (token) {
+      const existing = tokenToRoom.get(token);
+      if (existing && existing.roomCode === roomCode) {
+        const oldId = existing.socketId;
+        const player = room.players.get(oldId);
+        if (player) {
+          // migrate player to new socket
+          room.players.delete(oldId);
+          room.players.set(socket.id, player);
+          player.connected = true;
+
+          // update player order
+          const orderIdx = room.playerOrder.indexOf(oldId);
+          if (orderIdx !== -1) room.playerOrder[orderIdx] = socket.id;
+
+          // update token mapping
+          existing.socketId = socket.id;
+
+          currentRoom = roomCode;
+          socket.join(roomCode);
+          socket.emit('joined', { code: roomCode, name: player.name, token });
+          broadcastState(room);
+          return;
+        }
+      }
+    }
+
+    // ── Fresh join ──
     if (room.phase !== 'lobby') return socket.emit('error-msg', 'Game already in progress.');
     if (room.players.size >= 8) return socket.emit('error-msg', 'Room is full (max 8).');
 
@@ -330,19 +460,28 @@ io.on('connection', (socket) => {
     room.players.forEach(p => { if (p.name.toLowerCase() === name.trim().toLowerCase()) taken = true; });
     if (taken) return socket.emit('error-msg', 'That name is taken.');
 
+    const playerToken = generateToken();
     room.players.set(socket.id, {
       name: name.trim(),
       score: 0,
       lie: null,
       vote: null,
       avatar: avatarColors[room.players.size % avatarColors.length],
+      connected: true,
+      usedLieForMe: false,
+      token: playerToken,
     });
+    room.playerOrder.push(socket.id);
+
+    tokenToRoom.set(playerToken, { roomCode, socketId: socket.id });
+
     currentRoom = roomCode;
     socket.join(roomCode);
-    socket.emit('joined', { code: roomCode, name: name.trim() });
+    socket.emit('joined', { code: roomCode, name: name.trim(), token: playerToken });
     broadcastState(room);
   });
 
+  // ── SET MODE ─────────────────────────────────────
   socket.on('set-mode', ({ mode }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -353,11 +492,14 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── START GAME ───────────────────────────────────
   socket.on('start-game', () => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room || room.hostId !== socket.id) return;
     if (room.players.size < 2) return socket.emit('error-msg', 'Need at least 2 players.');
+
+    room.captainIndex = 0;
 
     if (room.mode === 'fanfacts') {
       room.phase = 'collect-facts';
@@ -370,6 +512,24 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── SELECT CATEGORY (Captain) ────────────────────
+  socket.on('select-category', ({ category }) => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.phase !== 'category-select') return;
+
+    // verify this socket is the captain
+    const captainId = room.playerOrder[room.captainIndex % room.playerOrder.length];
+    if (socket.id !== captainId) return socket.emit('error-msg', "It's not your turn to pick!");
+
+    const question = pickQuestionFromCategory(room, category);
+    if (!question) return socket.emit('error-msg', 'No questions left in that category.');
+
+    room.captainIndex++;
+    beginWritingPhase(room, question);
+  });
+
+  // ── SUBMIT FACT (Fan Facts) ──────────────────────
   socket.on('submit-fact', ({ text }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -383,7 +543,6 @@ io.on('connection', (socket) => {
     room.fanFacts.set(socket.id, { fact: cleaned });
     broadcastState(room);
 
-    // check if all submitted
     let allDone = true;
     room.players.forEach((p, id) => { if (!room.fanFacts.has(id)) allDone = false; });
     if (allDone) {
@@ -393,6 +552,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── SUBMIT LIE ───────────────────────────────────
   socket.on('submit-lie', ({ text }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -400,7 +560,6 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (!player) return;
     if (player.lie !== null) return socket.emit('error-msg', 'Already submitted.');
-    // In Fan Facts, the fact owner doesn't write
     if (room.mode === 'fanfacts' && socket.id === room.currentFactOwnerId) return;
 
     const cleaned = (text || '').trim();
@@ -412,24 +571,51 @@ io.on('connection', (socket) => {
     room.players.forEach(p => {
       if (p.lie && normalize(p.lie) === normalize(cleaned)) duplicate = true;
     });
-    if (duplicate) return socket.emit('error-msg', 'Someone already submitted that. Try something else!');
+    if (duplicate) return socket.emit('error-msg', 'Someone already submitted that!');
 
     player.lie = cleaned;
     broadcastState(room);
 
-    // check if all submitted (excluding fact owner in fanfacts mode)
-    let allSubmitted = true;
-    room.players.forEach((p, id) => {
-      if (room.mode === 'fanfacts' && id === room.currentFactOwnerId) return;
-      if (p.lie === null) allSubmitted = false;
-    });
-    if (allSubmitted) {
+    if (checkAllSubmitted(room)) {
       buildVotingOptions(room);
       room.phase = 'voting';
       broadcastState(room);
     }
   });
 
+  // ── LIE FOR ME ───────────────────────────────────
+  socket.on('lie-for-me', () => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.phase !== 'writing') return;
+    const player = room.players.get(socket.id);
+    if (!player) return;
+    if (player.lie !== null) return socket.emit('error-msg', 'Already submitted.');
+
+    const q = room.currentQuestion;
+    const decoys = q.decoys || [];
+    // find a decoy not already used by another player
+    const usedLies = new Set();
+    room.players.forEach(p => { if (p.lie) usedLies.add(normalize(p.lie)); });
+
+    const available = decoys.filter(d => !usedLies.has(normalize(d)));
+    if (available.length === 0) {
+      return socket.emit('error-msg', 'No auto-lies available. Write your own!');
+    }
+
+    const picked = available[Math.floor(Math.random() * available.length)];
+    player.lie = picked;
+    player.usedLieForMe = true;
+    broadcastState(room);
+
+    if (checkAllSubmitted(room)) {
+      buildVotingOptions(room);
+      room.phase = 'voting';
+      broadcastState(room);
+    }
+  });
+
+  // ── SUBMIT VOTE ──────────────────────────────────
   socket.on('submit-vote', ({ optionIndex }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -446,24 +632,19 @@ io.on('connection', (socket) => {
       room.votes.get(optionIndex).push(socket.id);
       broadcastState(room);
 
-      let allVoted = true;
-      room.players.forEach(p => { if (p.vote === null) allVoted = false; });
-      if (allVoted) {
+      if (checkAllVoted(room)) {
         calculateScoresForRound(room);
         room.phase = 'reveal';
         broadcastState(room);
       }
     } else if (room.phase === 'aboutyou-vote') {
-      // optionIndex is actually the player name
       const targetName = optionIndex;
       player.vote = targetName;
       if (!room.votes.has(targetName)) room.votes.set(targetName, []);
       room.votes.get(targetName).push(socket.id);
       broadcastState(room);
 
-      let allVoted = true;
-      room.players.forEach(p => { if (p.vote === null) allVoted = false; });
-      if (allVoted) {
+      if (checkAllVoted(room)) {
         calculateAboutYouScores(room);
         room.phase = 'aboutyou-reveal';
         broadcastState(room);
@@ -471,6 +652,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── NEXT ROUND ───────────────────────────────────
   socket.on('next-round', () => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -485,6 +667,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ── RESTART ──────────────────────────────────────
   socket.on('restart-game', () => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -492,10 +675,14 @@ io.on('connection', (socket) => {
     room.round = 0;
     room.phase = 'lobby';
     room.fanFacts = new Map();
-    room.players.forEach(p => { p.score = 0; p.lie = null; p.vote = null; });
+    room.captainIndex = 0;
+    room.isFinalRound = false;
+    room.scoreMultiplier = 1;
+    room.players.forEach(p => { p.score = 0; p.lie = null; p.vote = null; p.usedLieForMe = false; });
     broadcastState(room);
   });
 
+  // ── DISCONNECT ───────────────────────────────────
   socket.on('disconnect', () => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
@@ -503,12 +690,36 @@ io.on('connection', (socket) => {
 
     if (socket.id === room.hostId) {
       io.to(currentRoom).emit('error-msg', 'The host has disconnected. Game ended.');
+      // clean up tokens for this room
+      room.players.forEach(p => {
+        if (p.token) tokenToRoom.delete(p.token);
+      });
       rooms.delete(currentRoom);
     } else {
-      room.players.delete(socket.id);
-      if (room.players.size === 0 && room.phase !== 'lobby') {
-        rooms.delete(currentRoom);
-      } else {
+      const player = room.players.get(socket.id);
+      if (player) {
+        // mark as disconnected but keep data for reconnection
+        player.connected = false;
+
+        // auto-remove after 5 minutes if still disconnected
+        setTimeout(() => {
+          const r = rooms.get(currentRoom);
+          if (r) {
+            const p = r.players.get(socket.id);
+            if (p && !p.connected) {
+              if (p.token) tokenToRoom.delete(p.token);
+              r.players.delete(socket.id);
+              const orderIdx = r.playerOrder.indexOf(socket.id);
+              if (orderIdx !== -1) r.playerOrder.splice(orderIdx, 1);
+              if (r.players.size === 0 && r.phase !== 'lobby') {
+                rooms.delete(currentRoom);
+              } else {
+                broadcastState(r);
+              }
+            }
+          }
+        }, 5 * 60 * 1000);
+
         broadcastState(room);
       }
     }

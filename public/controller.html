@@ -59,13 +59,34 @@
         </div>
     </div>
 
+    <!-- ── CATEGORY SELECT (Captain) ──────────────────── -->
+    <div id="screen-captain-pick" class="screen">
+        <div class="ctrl-card">
+            <span class="phase-label">🏷️ You're the Captain!</span>
+            <p class="ctrl-prompt">Pick a category</p>
+            <div id="captain-categories" class="ctrl-options"></div>
+        </div>
+    </div>
+
+    <!-- ── CATEGORY WAIT (Non-captain) ────────────────── -->
+    <div id="screen-category-wait" class="screen">
+        <div class="center-col">
+            <div class="spinner"></div>
+            <p class="waiting-text"><span id="captain-picking">???</span> is picking the category…</p>
+        </div>
+    </div>
+
     <!-- ── WRITING SCREEN ─────────────────────────────── -->
     <div id="screen-write" class="screen">
         <div class="ctrl-card">
             <span class="round-badge" id="ctrl-round-w">Round 1/8</span>
             <p id="ctrl-prompt-w" class="ctrl-prompt"></p>
             <textarea id="input-lie" class="input-lie" rows="2" maxlength="80" placeholder="Type your lie…"></textarea>
-            <button id="btn-submit-lie" class="btn btn-glow">Submit</button>
+            <div class="write-actions">
+                <button id="btn-submit-lie" class="btn btn-glow">Submit</button>
+                <button id="btn-lie-for-me" class="btn btn-secondary">Lie for Me 🤖</button>
+            </div>
+            <p class="lie-for-me-hint">Lie for Me = half points if someone picks it</p>
             <p id="write-error" class="error-text"></p>
         </div>
     </div>

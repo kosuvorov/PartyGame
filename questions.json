@@ -2,91 +2,201 @@
     {
         "prompt": "In 2024, a city in Japan appointed a ____ as its official tourism ambassador.",
         "truth": "Pokemon",
-        "category": "Japan"
+        "category": "Japan",
+        "decoys": [
+            "Samurai sword",
+            "Bonsai tree",
+            "Anime villain"
+        ]
     },
     {
         "prompt": "NASA once accidentally sold a bag of ____ from the Apollo 11 mission at a government auction.",
         "truth": "Moon dust",
-        "category": "Space"
+        "category": "Space",
+        "decoys": [
+            "Tang powder",
+            "Freeze-dried ice cream",
+            "Space pen ink"
+        ]
     },
     {
         "prompt": "In Switzerland, it is illegal to own just one ____.",
         "truth": "Guinea pig",
-        "category": "Laws"
+        "category": "Laws",
+        "decoys": [
+            "Ski pole",
+            "Shoe",
+            "Fondue pot"
+        ]
     },
     {
         "prompt": "The shortest war in history lasted only ____ minutes.",
         "truth": "38",
-        "category": "History"
+        "category": "History",
+        "decoys": [
+            "12",
+            "45",
+            "7"
+        ]
     },
     {
         "prompt": "Oxford University is older than the ____.",
         "truth": "Aztec Empire",
-        "category": "History"
+        "category": "History",
+        "decoys": [
+            "Roman Colosseum",
+            "English language",
+            "Compass"
+        ]
     },
     {
         "prompt": "A group of flamingos is called a ____.",
         "truth": "Flamboyance",
-        "category": "Animals"
+        "category": "Animals",
+        "decoys": [
+            "Pinkening",
+            "Blush",
+            "Flock-tacular"
+        ]
     },
     {
         "prompt": "The inventor of the Pringles can is buried in one. His name was ____.",
         "truth": "Fredric Baur",
-        "category": "People"
+        "category": "People",
+        "decoys": [
+            "Harold Stackhouse",
+            "Eugene Crisp",
+            "Walter Tubman"
+        ]
     },
     {
         "prompt": "In 2006, a woman legally married a ____ in France.",
         "truth": "Dead man",
-        "category": "Laws"
+        "category": "Laws",
+        "decoys": [
+            "Bridge",
+            "Fictional character",
+            "Pet parrot"
+        ]
     },
     {
         "prompt": "Bananas are technically classified as ____.",
         "truth": "Berries",
-        "category": "Food"
+        "category": "Food",
+        "decoys": [
+            "Herbs",
+            "Nuts",
+            "Gourds"
+        ]
     },
     {
         "prompt": "The national animal of Scotland is the ____.",
         "truth": "Unicorn",
-        "category": "Countries"
+        "category": "Countries",
+        "decoys": [
+            "Highland cow",
+            "Golden eagle",
+            "Red stag"
+        ]
     },
     {
         "prompt": "Cleopatra lived closer in time to ____ than to the building of the Great Pyramid.",
         "truth": "The Moon landing",
-        "category": "History"
+        "category": "History",
+        "decoys": [
+            "The invention of pizza",
+            "Shakespeare",
+            "The Roman Empire"
+        ]
     },
     {
         "prompt": "The longest hiccuping spree lasted ____ years.",
         "truth": "68",
-        "category": "Records"
+        "category": "Records",
+        "decoys": [
+            "23",
+            "41",
+            "99"
+        ]
     },
     {
         "prompt": "There are more possible iterations of a game of ____ than there are atoms in the observable universe.",
         "truth": "Chess",
-        "category": "Games"
+        "category": "Games",
+        "decoys": [
+            "Scrabble",
+            "Monopoly",
+            "Poker"
+        ]
     },
     {
         "prompt": "Honey never ____.",
         "truth": "Expires",
-        "category": "Food"
+        "category": "Food",
+        "decoys": [
+            "Crystallizes",
+            "Changes color",
+            "Loses sweetness"
+        ]
     },
     {
         "prompt": "The first computer programmer was ____, who wrote instructions for a machine in the 1840s.",
         "truth": "Ada Lovelace",
-        "category": "Tech"
+        "category": "Tech",
+        "decoys": [
+            "Charles Babbage",
+            "Nikola Tesla",
+            "Mary Shelley"
+        ]
     },
     {
         "prompt": "In Australia, there was once a war fought against ____. The animals won.",
         "truth": "Emus",
-        "category": "History"
+        "category": "History",
+        "decoys": [
+            "Kangaroos",
+            "Cockatoos",
+            "Wombats"
+        ]
     },
     {
         "prompt": "A jiffy is an actual unit of time equal to ____.",
         "truth": "1/100th of a second",
-        "category": "Science"
+        "category": "Science",
+        "decoys": [
+            "3 milliseconds",
+            "1 nanosecond",
+            "10 microseconds"
+        ]
     },
     {
         "prompt": "The dot over the letter 'i' is called a ____.",
         "truth": "Tittle",
-        "category": "Language"
+        "category": "Language",
+        "decoys": [
+            "Dottie",
+            "Iota mark",
+            "Serif pip"
+        ]
+    },
+    {
+        "prompt": "The world's oldest known joke is about ____.",
+        "truth": "A fart",
+        "category": "History",
+        "decoys": [
+            "A drunk priest",
+            "A mother-in-law",
+            "A lazy farmer"
+        ]
+    },
+    {
+        "prompt": "In 1932, Australia fought and lost a war against a population of ____.",
+        "truth": "Emus",
+        "category": "History",
+        "decoys": [
+            "Rabbits",
+            "Possums",
+            "Crocodiles"
+        ]
     }
 ]

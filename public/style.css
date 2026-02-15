@@ -738,6 +738,120 @@ body {
     z-index: 1000;
 }
 
+/* ─── Category Grid ───────────────────────────────────────────────── */
+.category-grid {
+    display: flex;
+    gap: .75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-category {
+    font-family: var(--font);
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 1.25rem 2rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    cursor: default;
+    transition: all .2s;
+    min-width: 150px;
+    text-align: center;
+}
+
+/* ─── Category Tag ────────────────────────────────────────────────── */
+.category-tag {
+    font-size: .7rem;
+    font-weight: 700;
+    padding: .25rem .7rem;
+    background: rgba(124, 92, 252, .15);
+    border: 1px solid var(--accent);
+    border-radius: 50px;
+    color: var(--accent);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.category-tag:empty {
+    display: none;
+}
+
+/* ─── Final Fibbage Badge ─────────────────────────────────────────── */
+.final-badge {
+    font-size: 1rem;
+    font-weight: 800;
+    padding: .6rem 1.5rem;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    border-radius: 50px;
+    color: #1a1a2e;
+    text-align: center;
+    margin-bottom: 1rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(255, 215, 0, .3);
+    }
+
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 30px rgba(255, 215, 0, .5);
+    }
+}
+
+/* ─── Write Actions (Submit + Lie for Me side-by-side) ────────────── */
+.write-actions {
+    display: flex;
+    gap: .5rem;
+    width: 100%;
+}
+
+.write-actions .btn {
+    flex: 1;
+    padding: .85rem 1rem;
+    font-size: 1rem;
+}
+
+.btn-secondary {
+    font-family: var(--font);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: .85rem 1.5rem;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    cursor: pointer;
+    color: var(--text-dim);
+    background: var(--surface);
+    transition: transform .15s, border-color .2s, color .2s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    transform: translateY(-1px);
+}
+
+.lie-for-me-hint {
+    font-size: .75rem;
+    color: var(--text-dim);
+    text-align: center;
+    font-style: italic;
+}
+
+/* ─── Disconnected Tag ────────────────────────────────────────────── */
+.disconnected-tag {
+    font-size: .75rem;
+    margin-left: auto;
+    opacity: .6;
+}
+
 /* ─── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 700px) {
     .lobby-layout {

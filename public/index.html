@@ -64,12 +64,26 @@
     </div>
   </div>
 
+  <!-- ── CATEGORY SELECT (Classic) ──────────────────── -->
+  <div id="screen-category" class="screen">
+    <div class="center-col" style="max-width:600px;">
+      <span class="phase-label">🏷️ CATEGORY SELECT</span>
+      <div id="final-badge-cat" class="final-badge" style="display:none;">⚡ FINAL FIBBAGE — TRIPLE POINTS!</div>
+      <p class="subtitle">
+        <span id="captain-name">???</span> is choosing the category…
+      </p>
+      <div id="category-choices" class="category-grid"></div>
+    </div>
+  </div>
+
   <!-- ── WRITING PHASE ──────────────────────────────── -->
   <div id="screen-writing" class="screen">
     <div class="phase-header">
       <span class="round-badge" id="round-badge-w">Round 1/8</span>
       <span class="phase-label">✍️ WRITING</span>
+      <span id="category-tag-w" class="category-tag"></span>
     </div>
+    <div id="final-badge-w" class="final-badge" style="display:none;">⚡ FINAL FIBBAGE — TRIPLE POINTS!</div>
     <div class="prompt-card">
       <p id="fact-owner-w" class="fact-owner"></p>
       <p id="prompt-writing" class="prompt-text"></p>
@@ -85,7 +99,9 @@
     <div class="phase-header">
       <span class="round-badge" id="round-badge-v">Round 1/8</span>
       <span class="phase-label">🗳️ VOTING</span>
+      <span id="category-tag-v" class="category-tag"></span>
     </div>
+    <div id="final-badge-v" class="final-badge" style="display:none;">⚡ TRIPLE POINTS</div>
     <div class="prompt-card">
       <p id="fact-owner-v" class="fact-owner"></p>
       <p id="prompt-voting" class="prompt-text"></p>

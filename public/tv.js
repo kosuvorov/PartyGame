@@ -8,6 +8,7 @@
         create: document.getElementById('screen-create'),
         lobby: document.getElementById('screen-lobby'),
         collect: document.getElementById('screen-collect'),
+        category: document.getElementById('screen-category'),
         writing: document.getElementById('screen-writing'),
         voting: document.getElementById('screen-voting'),
         reveal: document.getElementById('screen-reveal'),
@@ -23,16 +24,23 @@
         qrContainer: document.getElementById('qr-container'),
         playerList: document.getElementById('player-list'),
         btnStart: document.getElementById('btn-start'),
+        collectCount: document.getElementById('collect-count'),
+        collectAvatars: document.getElementById('collect-avatars'),
+        captainName: document.getElementById('captain-name'),
+        categoryChoices: document.getElementById('category-choices'),
+        finalBadgeCat: document.getElementById('final-badge-cat'),
         factOwnerW: document.getElementById('fact-owner-w'),
         factOwnerV: document.getElementById('fact-owner-v'),
         factOwnerR: document.getElementById('fact-owner-r'),
         promptW: document.getElementById('prompt-writing'),
         promptV: document.getElementById('prompt-voting'),
         promptR: document.getElementById('prompt-reveal'),
+        categoryTagW: document.getElementById('category-tag-w'),
+        categoryTagV: document.getElementById('category-tag-v'),
+        finalBadgeW: document.getElementById('final-badge-w'),
+        finalBadgeV: document.getElementById('final-badge-v'),
         submitCount: document.getElementById('submit-count'),
         submitAvatars: document.getElementById('submit-avatars'),
-        collectCount: document.getElementById('collect-count'),
-        collectAvatars: document.getElementById('collect-avatars'),
         optionsList: document.getElementById('options-list'),
         revealResults: document.getElementById('reveal-results'),
         btnNext: document.getElementById('btn-next'),
@@ -50,8 +58,6 @@
         roundBadgeAR: document.getElementById('round-badge-ar'),
         confetti: document.getElementById('confetti-canvas'),
     };
-
-    let currentMode = 'classic';
 
     // ── Helpers ──────────────────────────────────────────────────────
     function showScreen(name) {
@@ -71,8 +77,7 @@
         btn.addEventListener('click', () => {
             document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentMode = btn.dataset.mode;
-            socket.emit('set-mode', { mode: currentMode });
+            socket.emit('set-mode', { mode: btn.dataset.mode });
         });
     });
 
@@ -87,11 +92,10 @@
 
     // ── State update handler ─────────────────────────────────────────
     socket.on('state-update', (data) => {
-        currentMode = data.mode || 'classic';
-
         switch (data.phase) {
             case 'lobby': renderLobby(data); break;
             case 'collect-facts': renderCollect(data); break;
+            case 'category-select': renderCategorySelect(data); break;
             case 'writing': renderWriting(data); break;
             case 'voting': renderVoting(data); break;
             case 'reveal': renderReveal(data); break;
@@ -129,11 +133,12 @@
             li.innerHTML = `
         <span class="player-avatar" style="background:${p.avatar}">${p.name[0]}</span>
         <span>${p.name}</span>
+        ${!p.connected ? '<span class="disconnected-tag">📴</span>' : ''}
       `;
             refs.playerList.appendChild(li);
         });
 
-        refs.btnStart.disabled = data.players.length < 2;
+        refs.btnStart.disabled = data.players.filter(p => p.connected).length < 2;
     }
 
     function renderCollect(data) {
@@ -149,11 +154,27 @@
         });
     }
 
+    function renderCategorySelect(data) {
+        showScreen('category');
+        refs.captainName.textContent = data.captainName;
+        refs.finalBadgeCat.style.display = data.isFinalRound ? 'block' : 'none';
+
+        refs.categoryChoices.innerHTML = '';
+        data.categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-category';
+            btn.textContent = cat;
+            refs.categoryChoices.appendChild(btn);
+        });
+    }
+
     function renderWriting(data) {
         showScreen('writing');
         refs.roundBadgeW.textContent = roundLabel(data);
         refs.promptW.textContent = data.prompt;
+        refs.categoryTagW.textContent = data.category || '';
         refs.factOwnerW.textContent = data.factOwner ? `⭐ ${data.factOwner}'s story` : '';
+        refs.finalBadgeW.style.display = data.isFinalRound ? 'block' : 'none';
         refs.submitCount.textContent = `${data.submitted.length} / ${data.total} submitted`;
 
         refs.submitAvatars.innerHTML = '';
@@ -170,7 +191,9 @@
         showScreen('voting');
         refs.roundBadgeV.textContent = roundLabel(data);
         refs.promptV.textContent = data.prompt;
+        refs.categoryTagV.textContent = data.category || '';
         refs.factOwnerV.textContent = data.factOwner ? `⭐ ${data.factOwner}'s story` : '';
+        refs.finalBadgeV.style.display = data.isFinalRound ? 'block' : 'none';
 
         refs.optionsList.innerHTML = '';
         data.options.forEach((text, i) => {
@@ -195,10 +218,11 @@
             const div = document.createElement('div');
             div.className = 'reveal-card' + (r.isTruth ? ' truth' : '');
             div.style.animationDelay = `${i * 0.12}s`;
+            const authorLabel = r.isTruth ? '' : r.isLieForMe ? 'Lie for Me 🤖' : 'Written by ' + r.author;
             div.innerHTML = `
         <div class="option-label">${LABELS[i]}${r.isTruth ? ' ✅ TRUTH' : ''}</div>
         <div class="option-text">${r.text}</div>
-        <div class="author-tag">${r.isTruth ? '' : 'Written by ' + r.author}</div>
+        <div class="author-tag">${authorLabel}</div>
         <div class="voters">${r.voters.length > 0 ? '👆 ' + r.voters.join(', ') : ''}</div>
       `;
             refs.revealResults.appendChild(div);
@@ -225,12 +249,10 @@
         refs.roundBadgeAR.textContent = roundLabel(data);
         refs.promptAYR.textContent = data.prompt;
 
-        // Build a horizontal bar chart
         const counts = data.voteCounts;
         const maxCount = Math.max(...Object.values(counts), 1);
         refs.aboutyouResults.innerHTML = '';
 
-        // Sort by votes descending
         const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
         entries.forEach(([name, count]) => {
             const row = document.createElement('div');
@@ -244,7 +266,6 @@
       `;
             refs.aboutyouResults.appendChild(row);
         });
-
         fireConfetti();
     }
 
