@@ -58,5 +58,93 @@
     {
         "prompt": "Which player has the weirdest hidden talent?",
         "category": "Secrets"
+    },
+    {
+        "prompt": "Which player would die first in a horror movie?",
+        "category": "Horror"
+    },
+    {
+        "prompt": "Which player is most likely to join a cult by accident?",
+        "category": "Gullible"
+    },
+    {
+        "prompt": "Which player has the absolute worst taste in music?",
+        "category": "Taste"
+    },
+    {
+        "prompt": "Which player would make the most convincing cult leader?",
+        "category": "Charisma"
+    },
+    {
+        "prompt": "Which player is most likely to get married in Vegas to a stranger?",
+        "category": "Romance"
+    },
+    {
+        "prompt": "Which player is most likely to forget their own birthday?",
+        "category": "Memory"
+    },
+    {
+        "prompt": "Which player would win a reality dating show?",
+        "category": "Romance"
+    },
+    {
+        "prompt": "Which player is most likely to break something expensive in a store?",
+        "category": "Clumsy"
+    },
+    {
+        "prompt": "Which player would be the absolute worst roommate?",
+        "category": "Living"
+    },
+    {
+        "prompt": "Which player is most likely to be a secret millionaire?",
+        "category": "Money"
+    },
+    {
+        "prompt": "Which player would make the best politician (for all the wrong reasons)?",
+        "category": "Career"
+    },
+    {
+        "prompt": "Which player is most likely to get arrested for something completely ridiculous?",
+        "category": "Law"
+    },
+    {
+        "prompt": "Which player thinks they're a comedian but really isn't?",
+        "category": "Humor"
+    },
+    {
+        "prompt": "Which player is most likely to trip on flat ground?",
+        "category": "Clumsy"
+    },
+    {
+        "prompt": "Which player would be the first to suggest robbing a bank?",
+        "category": "Crime"
+    },
+    {
+        "prompt": "Which player is most likely to adopt 10 cats?",
+        "category": "Animals"
+    },
+    {
+        "prompt": "Which player has the most 'Main Character Energy'?",
+        "category": "Vibes"
+    },
+    {
+        "prompt": "Which player is most likely to win the lottery and lose the ticket?",
+        "category": "Luck"
+    },
+    {
+        "prompt": "Which player would accidentally reveal state secrets as a spy?",
+        "category": "Skills"
+    },
+    {
+        "prompt": "Which player spends the most time looking at themselves in the mirror?",
+        "category": "Vanity"
+    },
+    {
+        "prompt": "Which player is most likely to become a mad scientist?",
+        "category": "Career"
+    },
+    {
+        "prompt": "Which player would survive the shortest amount of time in the wild?",
+        "category": "Survival"
     }
 ]

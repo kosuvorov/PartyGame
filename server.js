@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const triviaQuestions = require('./questions.json');
 const aboutYouQuestions = require('./questions-aboutyou.json');
+const eayPrompts = require('./questions-eay.json');
 
 // ── Bootstrap ────────────────────────────────────────────────────────
 const app = express();
@@ -40,7 +41,7 @@ function createRoom(hostSocketId) {
     code,
     hostId: hostSocketId,
     mode: 'classic',
-    // Phases: lobby | collect-facts | category-select | writing | voting | reveal
+    // Phases: lobby | collect-eay | category-select | writing | voting | reveal
     //         | aboutyou-vote | aboutyou-reveal | gameover
     phase: 'lobby',
     players: new Map(),       // socketId → PlayerData
@@ -57,9 +58,10 @@ function createRoom(hostSocketId) {
     truthIndex: -1,
     isFinalRound: false,
     scoreMultiplier: 1,
-    // Fan Facts
-    fanFacts: new Map(),
-    currentFactOwnerId: null,
+    // EAY (Enough About You)
+    eayAnswers: new Map(),            // socketId → { answer }
+    eayPromptAssignments: new Map(),  // socketId → prompt string
+    currentSubjectId: null,
   };
   rooms.set(code, room);
   return room;
@@ -85,7 +87,7 @@ function getCaptainName(room) {
   return captain ? captain.name : null;
 }
 
-// ── Category logic ───────────────────────────────────────────────────
+// ── Category logic (Classic) ─────────────────────────────────────────
 function buildQuestionPool(room) {
   const shuffled = [...triviaQuestions].sort(() => Math.random() - 0.5);
   const pool = {};
@@ -98,7 +100,6 @@ function buildQuestionPool(room) {
 
 function pickCategoryChoices(room) {
   const available = Object.keys(room.questionPool).filter(cat => room.questionPool[cat].length > 0);
-  // pick up to 3 random categories
   const shuffled = available.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(3, shuffled.length));
 }
@@ -106,7 +107,23 @@ function pickCategoryChoices(room) {
 function pickQuestionFromCategory(room, category) {
   const pool = room.questionPool[category];
   if (!pool || pool.length === 0) return null;
-  return pool.shift(); // take the first question of that category
+  return pool.shift();
+}
+
+// ── EAY logic ────────────────────────────────────────────────────────
+function assignEAYPrompts(room) {
+  const shuffled = [...eayPrompts].sort(() => Math.random() - 0.5);
+  let i = 0;
+  room.playerOrder.forEach(sid => {
+    const p = room.players.get(sid);
+    if (p) {
+      // personalise the prompt template with this player's name
+      const template = shuffled[i % shuffled.length];
+      const personalPrompt = template.replace(/\{PLAYER\}/g, p.name.toUpperCase());
+      room.eayPromptAssignments.set(sid, { template, personalPrompt });
+      i++;
+    }
+  });
 }
 
 // ── Broadcast ────────────────────────────────────────────────────────
@@ -129,9 +146,9 @@ function broadcastState(room) {
       tvData.message = 'Waiting for players…';
       break;
 
-    case 'collect-facts': {
+    case 'collect-eay': {
       const submitted = [];
-      room.fanFacts.forEach((f, id) => {
+      room.eayAnswers.forEach((a, id) => {
         const p = room.players.get(id);
         if (p) submitted.push(p.name);
       });
@@ -151,10 +168,13 @@ function broadcastState(room) {
       tvData.prompt = room.currentQuestion.prompt;
       tvData.category = room.currentQuestion.category;
       tvData.submitted = submitted;
-      tvData.total = room.mode === 'fanfacts'
-        ? Array.from(room.players.values()).filter(p => p.name !== room.currentQuestion.ownerName).length
-        : room.players.size;
-      if (room.mode === 'fanfacts') tvData.factOwner = room.currentQuestion.ownerName;
+      if (room.mode === 'eay') {
+        const subject = room.players.get(room.currentSubjectId);
+        tvData.subjectName = subject ? subject.name : '???';
+        tvData.total = room.players.size - 1; // subject doesn't write
+      } else {
+        tvData.total = room.players.size;
+      }
       break;
     }
 
@@ -162,7 +182,10 @@ function broadcastState(room) {
       tvData.prompt = room.currentQuestion.prompt;
       tvData.category = room.currentQuestion.category;
       tvData.options = room.options.map(o => o.text);
-      if (room.mode === 'fanfacts') tvData.factOwner = room.currentQuestion.ownerName;
+      if (room.mode === 'eay') {
+        const subject = room.players.get(room.currentSubjectId);
+        tvData.subjectName = subject ? subject.name : '???';
+      }
       break;
 
     case 'reveal':
@@ -170,7 +193,13 @@ function broadcastState(room) {
       tvData.category = room.currentQuestion.category;
       tvData.results = buildRevealResults(room);
       tvData.truthIndex = room.truthIndex;
-      if (room.mode === 'fanfacts') tvData.factOwner = room.currentQuestion.ownerName;
+      if (room.mode === 'eay') {
+        const subject = room.players.get(room.currentSubjectId);
+        tvData.subjectName = subject ? subject.name : '???';
+        // count how many guessed the truth (for reputation bonus display)
+        const correctCount = (room.votes.get(room.truthIndex) || []).length;
+        tvData.reputationBonus = correctCount * 1000;
+      }
       break;
 
     case 'aboutyou-vote':
@@ -198,14 +227,22 @@ function broadcastState(room) {
 
   // ── Per-player controller data ──
   room.players.forEach((player, socketId) => {
-    if (!player.connected) return; // skip disconnected players
+    if (!player.connected) return;
     let cd = { ...base, you: player.name, yourScore: player.score };
-    const isCaptain = room.playerOrder[room.captainIndex % room.playerOrder.length] === socketId;
+    const isCaptain = room.playerOrder.length > 0 &&
+      room.playerOrder[room.captainIndex % room.playerOrder.length] === socketId;
 
     switch (room.phase) {
-      case 'collect-facts':
-        cd.submitted = room.fanFacts.has(socketId);
+      case 'collect-eay': {
+        cd.submitted = room.eayAnswers.has(socketId);
+        // send THIS player's personal prompt
+        const assignment = room.eayPromptAssignments.get(socketId);
+        if (assignment) {
+          // For the answering phase, show the prompt with "you" instead of their name
+          cd.eayPrompt = assignment.template.replace(/\{PLAYER\}/g, 'you');
+        }
         break;
+      }
 
       case 'category-select':
         cd.isCaptain = isCaptain;
@@ -217,24 +254,36 @@ function broadcastState(room) {
         cd.prompt = room.currentQuestion.prompt;
         cd.category = room.currentQuestion.category;
         cd.submitted = player.lie !== null;
-        if (room.mode === 'fanfacts' && socketId === room.currentFactOwnerId) {
-          cd.isFactOwner = true;
+        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+          cd.isSubject = true;
           cd.submitted = true;
         }
         break;
 
-      case 'voting':
+      case 'voting': {
         cd.prompt = room.currentQuestion.prompt;
-        cd.options = room.options
-          .map((o, i) => ({ text: o.text, index: i }))
-          .filter(o => o.text !== player.lie);
-        cd.voted = player.vote !== null;
+        // Subject doesn't vote in EAY mode
+        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+          cd.isSubject = true;
+          cd.voted = true; // they don't vote
+        } else {
+          cd.options = room.options
+            .map((o, i) => ({ text: o.text, index: i }))
+            .filter(o => o.text !== player.lie);
+          cd.voted = player.vote !== null;
+        }
         break;
+      }
 
       case 'reveal':
         cd.results = buildRevealResults(room);
         cd.truthIndex = room.truthIndex;
         cd.prompt = room.currentQuestion.prompt;
+        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+          cd.isSubject = true;
+          const correctCount = (room.votes.get(room.truthIndex) || []).length;
+          cd.reputationBonus = correctCount * 1000;
+        }
         break;
 
       case 'aboutyou-vote':
@@ -277,22 +326,25 @@ function prepareQuestions(room) {
   if (room.mode === 'classic') {
     buildQuestionPool(room);
     room.totalRounds = 8;
-  } else if (room.mode === 'fanfacts') {
-    const facts = [];
-    room.fanFacts.forEach((f, id) => {
-      const p = room.players.get(id);
-      if (p) {
-        facts.push({
-          prompt: `Something that happened to ${p.name}: ____`,
-          truth: f.fact,
-          ownerId: id,
-          ownerName: p.name,
-          category: 'Fan Facts',
+  } else if (room.mode === 'eay') {
+    // build one round per player, using assigned prompts + answers
+    const questions = [];
+    room.playerOrder.forEach(sid => {
+      const p = room.players.get(sid);
+      const assignment = room.eayPromptAssignments.get(sid);
+      const answer = room.eayAnswers.get(sid);
+      if (p && assignment && answer) {
+        questions.push({
+          prompt: assignment.personalPrompt,
+          truth: answer.answer,
+          subjectId: sid,
+          subjectName: p.name,
+          category: 'Enough About You',
           decoys: [],
         });
       }
     });
-    room.questions = facts.sort(() => Math.random() - 0.5);
+    room.questions = questions.sort(() => Math.random() - 0.5);
     room.totalRounds = room.questions.length;
   } else if (room.mode === 'aboutyou') {
     room.questions = [...aboutYouQuestions].sort(() => Math.random() - 0.5);
@@ -306,7 +358,7 @@ function startRound(room) {
   room.truthIndex = -1;
   room.players.forEach(p => { p.lie = null; p.vote = null; p.usedLieForMe = false; });
 
-  // Final round check (last round = triple points)
+  // Final round check (last round = triple points) — Classic only
   room.isFinalRound = (room.round === room.totalRounds - 1) && room.mode === 'classic';
   room.scoreMultiplier = room.isFinalRound ? 3 : 1;
 
@@ -314,16 +366,18 @@ function startRound(room) {
     room.currentQuestion = room.questions[room.round];
     room.phase = 'aboutyou-vote';
     broadcastState(room);
-  } else if (room.mode === 'fanfacts') {
+  } else if (room.mode === 'eay') {
     room.currentQuestion = room.questions[room.round];
-    room.currentFactOwnerId = room.currentQuestion.ownerId;
+    room.currentSubjectId = room.currentQuestion.subjectId;
+    // Subject already has the truth, mark their vote as done
+    const subject = room.players.get(room.currentSubjectId);
+    if (subject) subject.vote = '__SUBJECT__'; // sentinel value
     room.phase = 'writing';
     broadcastState(room);
   } else {
     // Classic: captain picks a category
     room.categoryChoices = pickCategoryChoices(room);
     if (room.categoryChoices.length === 0) {
-      // no more categories — end the game
       room.phase = 'gameover';
       broadcastState(room);
       return;
@@ -375,6 +429,14 @@ function calculateScoresForRound(room) {
       }
     }
   });
+  // EAY Reputation Bonus: Subject gets +1000 for each person who guessed their truth
+  if (room.mode === 'eay' && room.currentSubjectId) {
+    const correctVoters = room.votes.get(room.truthIndex) || [];
+    const subject = room.players.get(room.currentSubjectId);
+    if (subject) {
+      subject.score += correctVoters.length * 1000;
+    }
+  }
 }
 
 function calculateAboutYouScores(room) {
@@ -394,7 +456,7 @@ function calculateAboutYouScores(room) {
 function checkAllSubmitted(room) {
   let allSubmitted = true;
   room.players.forEach((p, id) => {
-    if (room.mode === 'fanfacts' && id === room.currentFactOwnerId) return;
+    if (room.mode === 'eay' && id === room.currentSubjectId) return;
     if (p.lie === null) allSubmitted = false;
   });
   return allSubmitted;
@@ -431,16 +493,23 @@ io.on('connection', (socket) => {
         const oldId = existing.socketId;
         const player = room.players.get(oldId);
         if (player) {
-          // migrate player to new socket
           room.players.delete(oldId);
           room.players.set(socket.id, player);
           player.connected = true;
-
-          // update player order
           const orderIdx = room.playerOrder.indexOf(oldId);
           if (orderIdx !== -1) room.playerOrder[orderIdx] = socket.id;
 
-          // update token mapping
+          // migrate EAY data
+          if (room.eayPromptAssignments.has(oldId)) {
+            room.eayPromptAssignments.set(socket.id, room.eayPromptAssignments.get(oldId));
+            room.eayPromptAssignments.delete(oldId);
+          }
+          if (room.eayAnswers.has(oldId)) {
+            room.eayAnswers.set(socket.id, room.eayAnswers.get(oldId));
+            room.eayAnswers.delete(oldId);
+          }
+          if (room.currentSubjectId === oldId) room.currentSubjectId = socket.id;
+
           existing.socketId = socket.id;
 
           currentRoom = roomCode;
@@ -486,7 +555,7 @@ io.on('connection', (socket) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room || room.hostId !== socket.id) return;
-    if (['classic', 'fanfacts', 'aboutyou'].includes(mode)) {
+    if (['classic', 'eay', 'aboutyou'].includes(mode)) {
       room.mode = mode;
       broadcastState(room);
     }
@@ -501,9 +570,11 @@ io.on('connection', (socket) => {
 
     room.captainIndex = 0;
 
-    if (room.mode === 'fanfacts') {
-      room.phase = 'collect-facts';
-      room.fanFacts = new Map();
+    if (room.mode === 'eay') {
+      room.eayAnswers = new Map();
+      room.eayPromptAssignments = new Map();
+      assignEAYPrompts(room);
+      room.phase = 'collect-eay';
       broadcastState(room);
     } else {
       prepareQuestions(room);
@@ -517,8 +588,6 @@ io.on('connection', (socket) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room || room.phase !== 'category-select') return;
-
-    // verify this socket is the captain
     const captainId = room.playerOrder[room.captainIndex % room.playerOrder.length];
     if (socket.id !== captainId) return socket.emit('error-msg', "It's not your turn to pick!");
 
@@ -529,22 +598,23 @@ io.on('connection', (socket) => {
     beginWritingPhase(room, question);
   });
 
-  // ── SUBMIT FACT (Fan Facts) ──────────────────────
-  socket.on('submit-fact', ({ text }) => {
+  // ── SUBMIT EAY ANSWER (honest answer) ────────────
+  socket.on('submit-eay-answer', ({ text }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
-    if (!room || room.phase !== 'collect-facts') return;
+    if (!room || room.phase !== 'collect-eay') return;
     const player = room.players.get(socket.id);
     if (!player) return;
     const cleaned = (text || '').trim();
     if (!cleaned) return socket.emit('error-msg', 'Cannot be empty.');
-    if (room.fanFacts.has(socket.id)) return socket.emit('error-msg', 'Already submitted.');
+    if (room.eayAnswers.has(socket.id)) return socket.emit('error-msg', 'Already submitted.');
 
-    room.fanFacts.set(socket.id, { fact: cleaned });
+    room.eayAnswers.set(socket.id, { answer: cleaned });
     broadcastState(room);
 
+    // check if all players have answered
     let allDone = true;
-    room.players.forEach((p, id) => { if (!room.fanFacts.has(id)) allDone = false; });
+    room.players.forEach((p, id) => { if (!room.eayAnswers.has(id)) allDone = false; });
     if (allDone) {
       prepareQuestions(room);
       room.round = 0;
@@ -560,7 +630,7 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (!player) return;
     if (player.lie !== null) return socket.emit('error-msg', 'Already submitted.');
-    if (room.mode === 'fanfacts' && socket.id === room.currentFactOwnerId) return;
+    if (room.mode === 'eay' && socket.id === room.currentSubjectId) return;
 
     const cleaned = (text || '').trim();
     if (!cleaned) return socket.emit('error-msg', 'Cannot be empty.');
@@ -594,7 +664,6 @@ io.on('connection', (socket) => {
 
     const q = room.currentQuestion;
     const decoys = q.decoys || [];
-    // find a decoy not already used by another player
     const usedLies = new Set();
     room.players.forEach(p => { if (p.lie) usedLies.add(normalize(p.lie)); });
 
@@ -625,6 +694,9 @@ io.on('connection', (socket) => {
     if (player.vote !== null) return socket.emit('error-msg', 'Already voted.');
 
     if (room.phase === 'voting') {
+      // Subject can't vote in EAY
+      if (room.mode === 'eay' && socket.id === room.currentSubjectId) return;
+
       const opt = room.options[optionIndex];
       if (opt && opt.authorId === socket.id) return socket.emit('error-msg', "You can't vote for your own lie!");
       player.vote = optionIndex;
@@ -674,7 +746,9 @@ io.on('connection', (socket) => {
     if (!room || room.hostId !== socket.id) return;
     room.round = 0;
     room.phase = 'lobby';
-    room.fanFacts = new Map();
+    room.eayAnswers = new Map();
+    room.eayPromptAssignments = new Map();
+    room.currentSubjectId = null;
     room.captainIndex = 0;
     room.isFinalRound = false;
     room.scoreMultiplier = 1;
@@ -690,7 +764,6 @@ io.on('connection', (socket) => {
 
     if (socket.id === room.hostId) {
       io.to(currentRoom).emit('error-msg', 'The host has disconnected. Game ended.');
-      // clean up tokens for this room
       room.players.forEach(p => {
         if (p.token) tokenToRoom.delete(p.token);
       });
@@ -698,10 +771,7 @@ io.on('connection', (socket) => {
     } else {
       const player = room.players.get(socket.id);
       if (player) {
-        // mark as disconnected but keep data for reconnection
         player.connected = false;
-
-        // auto-remove after 5 minutes if still disconnected
         setTimeout(() => {
           const r = rooms.get(currentRoom);
           if (r) {
@@ -719,7 +789,6 @@ io.on('connection', (socket) => {
             }
           }
         }, 5 * 60 * 1000);
-
         broadcastState(room);
       }
     }

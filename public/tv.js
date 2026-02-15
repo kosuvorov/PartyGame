@@ -7,7 +7,7 @@
     const screens = {
         create: document.getElementById('screen-create'),
         lobby: document.getElementById('screen-lobby'),
-        collect: document.getElementById('screen-collect'),
+        collectEay: document.getElementById('screen-collect-eay'),
         category: document.getElementById('screen-category'),
         writing: document.getElementById('screen-writing'),
         voting: document.getElementById('screen-voting'),
@@ -24,14 +24,14 @@
         qrContainer: document.getElementById('qr-container'),
         playerList: document.getElementById('player-list'),
         btnStart: document.getElementById('btn-start'),
-        collectCount: document.getElementById('collect-count'),
-        collectAvatars: document.getElementById('collect-avatars'),
+        collectEayCount: document.getElementById('collect-eay-count'),
+        collectEayAvatars: document.getElementById('collect-eay-avatars'),
         captainName: document.getElementById('captain-name'),
         categoryChoices: document.getElementById('category-choices'),
         finalBadgeCat: document.getElementById('final-badge-cat'),
-        factOwnerW: document.getElementById('fact-owner-w'),
-        factOwnerV: document.getElementById('fact-owner-v'),
-        factOwnerR: document.getElementById('fact-owner-r'),
+        subjectTagW: document.getElementById('subject-tag-w'),
+        subjectTagV: document.getElementById('subject-tag-v'),
+        subjectTagR: document.getElementById('subject-tag-r'),
         promptW: document.getElementById('prompt-writing'),
         promptV: document.getElementById('prompt-voting'),
         promptR: document.getElementById('prompt-reveal'),
@@ -43,6 +43,7 @@
         submitAvatars: document.getElementById('submit-avatars'),
         optionsList: document.getElementById('options-list'),
         revealResults: document.getElementById('reveal-results'),
+        reputationBonus: document.getElementById('reputation-bonus'),
         btnNext: document.getElementById('btn-next'),
         promptAY: document.getElementById('prompt-aboutyou'),
         aboutyouOptions: document.getElementById('aboutyou-options'),
@@ -61,7 +62,7 @@
 
     // ── Helpers ──────────────────────────────────────────────────────
     function showScreen(name) {
-        Object.values(screens).forEach(s => s.classList.remove('active'));
+        Object.values(screens).forEach(s => s?.classList.remove('active'));
         if (screens[name]) screens[name].classList.add('active');
     }
 
@@ -94,7 +95,7 @@
     socket.on('state-update', (data) => {
         switch (data.phase) {
             case 'lobby': renderLobby(data); break;
-            case 'collect-facts': renderCollect(data); break;
+            case 'collect-eay': renderCollectEay(data); break;
             case 'category-select': renderCategorySelect(data); break;
             case 'writing': renderWriting(data); break;
             case 'voting': renderVoting(data); break;
@@ -141,16 +142,16 @@
         refs.btnStart.disabled = data.players.filter(p => p.connected).length < 2;
     }
 
-    function renderCollect(data) {
-        showScreen('collect');
-        refs.collectCount.textContent = `${data.submitted.length} / ${data.total} submitted`;
-        refs.collectAvatars.innerHTML = '';
+    function renderCollectEay(data) {
+        showScreen('collectEay');
+        refs.collectEayCount.textContent = `${data.submitted.length} / ${data.total} answered`;
+        refs.collectEayAvatars.innerHTML = '';
         data.players.forEach(p => {
             const dot = document.createElement('div');
             dot.className = 'avatar-dot ' + (data.submitted.includes(p.name) ? 'done' : 'pending');
             dot.style.background = p.avatar;
             dot.textContent = p.name[0];
-            refs.collectAvatars.appendChild(dot);
+            refs.collectEayAvatars.appendChild(dot);
         });
     }
 
@@ -173,12 +174,20 @@
         refs.roundBadgeW.textContent = roundLabel(data);
         refs.promptW.textContent = data.prompt;
         refs.categoryTagW.textContent = data.category || '';
-        refs.factOwnerW.textContent = data.factOwner ? `⭐ ${data.factOwner}'s story` : '';
+        if (data.mode === 'eay') {
+            refs.subjectTagW.textContent = `About ${data.subjectName}`;
+            refs.subjectTagW.style.display = 'block';
+        } else {
+            refs.subjectTagW.style.display = 'none';
+        }
         refs.finalBadgeW.style.display = data.isFinalRound ? 'block' : 'none';
         refs.submitCount.textContent = `${data.submitted.length} / ${data.total} submitted`;
 
         refs.submitAvatars.innerHTML = '';
         data.players.forEach(p => {
+            // In EAY, skip the subject in the submitted tracking bubbles if desired, or show them as distinct
+            if (data.mode === 'eay' && p.name === data.subjectName) return;
+
             const dot = document.createElement('div');
             dot.className = 'avatar-dot ' + (data.submitted.includes(p.name) ? 'done' : 'pending');
             dot.style.background = p.avatar;
@@ -192,7 +201,12 @@
         refs.roundBadgeV.textContent = roundLabel(data);
         refs.promptV.textContent = data.prompt;
         refs.categoryTagV.textContent = data.category || '';
-        refs.factOwnerV.textContent = data.factOwner ? `⭐ ${data.factOwner}'s story` : '';
+        if (data.mode === 'eay') {
+            refs.subjectTagV.textContent = `About ${data.subjectName}`;
+            refs.subjectTagV.style.display = 'block';
+        } else {
+            refs.subjectTagV.style.display = 'none';
+        }
         refs.finalBadgeV.style.display = data.isFinalRound ? 'block' : 'none';
 
         refs.optionsList.innerHTML = '';
@@ -211,23 +225,43 @@
         showScreen('reveal');
         refs.roundBadgeR.textContent = roundLabel(data);
         refs.promptR.textContent = data.prompt;
-        refs.factOwnerR.textContent = data.factOwner ? `⭐ ${data.factOwner}'s story` : '';
+        if (data.mode === 'eay') {
+            refs.subjectTagR.textContent = `About ${data.subjectName}`;
+            refs.subjectTagR.style.display = 'block';
+            if (data.reputationBonus > 0) {
+                refs.reputationBonus.style.display = 'block';
+                refs.reputationBonus.textContent = `⭐ REPUTATION BONUS: +${data.reputationBonus}`;
+            } else {
+                refs.reputationBonus.style.display = 'none';
+            }
+        } else {
+            refs.subjectTagR.style.display = 'none';
+            refs.reputationBonus.style.display = 'none';
+        }
 
         refs.revealResults.innerHTML = '';
         data.results.forEach((r, i) => {
             const div = document.createElement('div');
             div.className = 'reveal-card' + (r.isTruth ? ' truth' : '');
             div.style.animationDelay = `${i * 0.12}s`;
-            const authorLabel = r.isTruth ? '' : r.isLieForMe ? 'Lie for Me 🤖' : 'Written by ' + r.author;
+            let authorLabel = '';
+            if (r.isTruth) authorLabel = '✅ TRUTH';
+            else if (r.isLieForMe) authorLabel = 'Lie for Me 🤖';
+            else if (r.author) authorLabel = 'Written by ' + r.author;
+
             div.innerHTML = `
-        <div class="option-label">${LABELS[i]}${r.isTruth ? ' ✅ TRUTH' : ''}</div>
-        <div class="option-text">${r.text}</div>
+        <div class="option-label">${LABELS[i]}</div>
+        <div class="option-text">${textToHtml(r.text)}</div>
         <div class="author-tag">${authorLabel}</div>
         <div class="voters">${r.voters.length > 0 ? '👆 ' + r.voters.join(', ') : ''}</div>
       `;
             refs.revealResults.appendChild(div);
         });
         fireConfetti();
+    }
+
+    function textToHtml(str) {
+        return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function renderAboutYouVote(data) {

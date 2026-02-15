@@ -38,23 +38,24 @@
         </div>
     </div>
 
-    <!-- ── COLLECT FACT (Fan Facts mode) ──────────────── -->
-    <div id="screen-collect-fact" class="screen">
+    <!-- ── EAY: ANSWER YOUR PROMPT ────────────────────── -->
+    <div id="screen-eay-answer" class="screen">
         <div class="ctrl-card">
-            <span class="phase-label">🎤 Fan Facts</span>
-            <p class="ctrl-prompt">Share something wild that really happened to you!</p>
-            <textarea id="input-fact" class="input-lie" rows="3" maxlength="120"
-                placeholder="e.g. I once got stuck in an elevator with a goat…"></textarea>
-            <button id="btn-submit-fact" class="btn btn-glow">Submit My Fact</button>
-            <p id="fact-error" class="error-text"></p>
+            <span class="phase-label">💬 Enough About You</span>
+            <p class="ctrl-prompt" id="eay-prompt-text">Loading your prompt…</p>
+            <textarea id="input-eay-answer" class="input-lie" rows="2" maxlength="80"
+                placeholder="Type your honest answer…"></textarea>
+            <button id="btn-submit-eay" class="btn btn-glow">Submit Truth</button>
+            <p class="eay-hint">Be honest! You get bonus points when people recognise your answer.</p>
+            <p id="eay-error" class="error-text"></p>
         </div>
     </div>
 
-    <!-- ── FACT SUBMITTED ─────────────────────────────── -->
-    <div id="screen-fact-submitted" class="screen">
+    <!-- ── EAY ANSWER SUBMITTED ───────────────────────── -->
+    <div id="screen-eay-submitted" class="screen">
         <div class="center-col">
             <div class="check-circle">✓</div>
-            <p class="waiting-text">Fact submitted!</p>
+            <p class="waiting-text">Answer submitted!</p>
             <p class="sub-text">Waiting for everyone else…</p>
         </div>
     </div>
@@ -100,12 +101,21 @@
         </div>
     </div>
 
-    <!-- ── FACT OWNER WAITING ─────────────────────────── -->
-    <div id="screen-fact-owner" class="screen">
+    <!-- ── SUBJECT WAITING (EAY — your round) ─────────── -->
+    <div id="screen-subject" class="screen">
         <div class="center-col">
-            <div class="fact-owner-badge">⭐</div>
-            <p class="waiting-text">This round is about YOUR fact!</p>
-            <p class="sub-text">Others are writing fake versions…</p>
+            <div class="subject-badge">⭐</div>
+            <p class="waiting-text">This round is about YOU!</p>
+            <p class="sub-text">Others are writing fake answers…</p>
+        </div>
+    </div>
+
+    <!-- ── SUBJECT VOTING WAIT (EAY) ──────────────────── -->
+    <div id="screen-subject-voting" class="screen">
+        <div class="center-col">
+            <div class="subject-badge">🎯</div>
+            <p class="waiting-text">Will they find YOUR truth?</p>
+            <p class="sub-text">Everyone is voting…</p>
         </div>
     </div>
 
@@ -133,6 +143,7 @@
         <div class="center-col">
             <p class="score-big" id="ctrl-score">0</p>
             <p class="label">YOUR SCORE</p>
+            <p id="ctrl-reputation" class="reputation-badge" style="display:none;"></p>
             <p class="sub-text" style="margin-top:1rem;">Look at the big screen!</p>
         </div>
     </div>

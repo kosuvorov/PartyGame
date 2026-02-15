@@ -36,8 +36,8 @@
           <div class="mode-buttons">
             <button class="btn-mode active" data-mode="classic">🧠 Classic<br><span
                 class="mode-sub">Trivia</span></button>
-            <button class="btn-mode" data-mode="fanfacts">🎤 Fan Facts<br><span class="mode-sub">Your
-                Stories</span></button>
+            <button class="btn-mode" data-mode="eay">💬 Enough<br>About You<br><span
+                class="mode-sub">Personal</span></button>
             <button class="btn-mode" data-mode="aboutyou">👥 About You<br><span class="mode-sub">The
                 Group</span></button>
           </div>
@@ -52,14 +52,14 @@
     </div>
   </div>
 
-  <!-- ── COLLECT FACTS (Fan Facts) ──────────────────── -->
-  <div id="screen-collect" class="screen">
+  <!-- ── COLLECT EAY ANSWERS ────────────────────────── -->
+  <div id="screen-collect-eay" class="screen">
     <div class="center-col" style="max-width:600px;">
-      <span class="phase-label">🎤 Collecting Fan Facts…</span>
-      <p class="subtitle">Players are typing their wildest personal stories</p>
+      <span class="phase-label">💬 Enough About You</span>
+      <p class="subtitle">Everyone is answering their personal prompt…<br>Be honest!</p>
       <div class="submit-tracker">
-        <p id="collect-count">0 / 0 submitted</p>
-        <div class="avatar-row" id="collect-avatars"></div>
+        <p id="collect-eay-count">0 / 0 answered</p>
+        <div class="avatar-row" id="collect-eay-avatars"></div>
       </div>
     </div>
   </div>
@@ -85,7 +85,7 @@
     </div>
     <div id="final-badge-w" class="final-badge" style="display:none;">⚡ FINAL FIBBAGE — TRIPLE POINTS!</div>
     <div class="prompt-card">
-      <p id="fact-owner-w" class="fact-owner"></p>
+      <p id="subject-tag-w" class="subject-tag"></p>
       <p id="prompt-writing" class="prompt-text"></p>
     </div>
     <div class="submit-tracker">
@@ -98,12 +98,12 @@
   <div id="screen-voting" class="screen">
     <div class="phase-header">
       <span class="round-badge" id="round-badge-v">Round 1/8</span>
-      <span class="phase-label">🗳️ VOTING</span>
+      <span class="phase-label">🗳️ PICK AN ANSWER!</span>
       <span id="category-tag-v" class="category-tag"></span>
     </div>
     <div id="final-badge-v" class="final-badge" style="display:none;">⚡ TRIPLE POINTS</div>
     <div class="prompt-card">
-      <p id="fact-owner-v" class="fact-owner"></p>
+      <p id="subject-tag-v" class="subject-tag"></p>
       <p id="prompt-voting" class="prompt-text"></p>
     </div>
     <div id="options-list" class="options-grid"></div>
@@ -116,9 +116,10 @@
       <span class="phase-label">🎭 REVEAL</span>
     </div>
     <div class="prompt-card">
-      <p id="fact-owner-r" class="fact-owner"></p>
+      <p id="subject-tag-r" class="subject-tag"></p>
       <p id="prompt-reveal" class="prompt-text"></p>
     </div>
+    <div id="reputation-bonus" class="reputation-bonus" style="display:none;"></div>
     <div id="reveal-results" class="reveal-grid"></div>
     <button id="btn-next" class="btn btn-glow" style="margin-top:2rem;">Next Round →</button>
   </div>

@@ -8,13 +8,14 @@
     const screens = {
         join: document.getElementById('screen-join'),
         waiting: document.getElementById('screen-waiting'),
-        collectFact: document.getElementById('screen-collect-fact'),
-        factSubmitted: document.getElementById('screen-fact-submitted'),
+        eayAnswer: document.getElementById('screen-eay-answer'),
+        eaySubmitted: document.getElementById('screen-eay-submitted'),
         captainPick: document.getElementById('screen-captain-pick'),
         categoryWait: document.getElementById('screen-category-wait'),
         write: document.getElementById('screen-write'),
         submitted: document.getElementById('screen-submitted'),
-        factOwner: document.getElementById('screen-fact-owner'),
+        subject: document.getElementById('screen-subject'),
+        subjectVoting: document.getElementById('screen-subject-voting'),
         vote: document.getElementById('screen-vote'),
         voted: document.getElementById('screen-voted'),
         reveal: document.getElementById('screen-ctrl-reveal'),
@@ -27,9 +28,10 @@
         btnJoin: document.getElementById('btn-join'),
         joinError: document.getElementById('join-error'),
         myNameTag: document.getElementById('my-name-tag'),
-        inputFact: document.getElementById('input-fact'),
-        btnFact: document.getElementById('btn-submit-fact'),
-        factError: document.getElementById('fact-error'),
+        eayPromptText: document.getElementById('eay-prompt-text'),
+        inputEay: document.getElementById('input-eay-answer'),
+        btnSubmitEay: document.getElementById('btn-submit-eay'),
+        eayError: document.getElementById('eay-error'),
         captainCats: document.getElementById('captain-categories'),
         captainPicking: document.getElementById('captain-picking'),
         ctrlPromptW: document.getElementById('ctrl-prompt-w'),
@@ -41,6 +43,7 @@
         ctrlOptions: document.getElementById('ctrl-options'),
         voteError: document.getElementById('vote-error'),
         ctrlScore: document.getElementById('ctrl-score'),
+        ctrlReputation: document.getElementById('ctrl-reputation'),
         ctrlFinal: document.getElementById('ctrl-final-score'),
         roundBadgeW: document.getElementById('ctrl-round-w'),
         roundBadgeV: document.getElementById('ctrl-round-v'),
@@ -95,7 +98,7 @@
 
     // ── Helpers ──────────────────────────────────────────────────────
     function showScreen(name) {
-        Object.values(screens).forEach(s => s.classList.remove('active'));
+        Object.values(screens).forEach(s => s?.classList.remove('active'));
         if (screens[name]) screens[name].classList.add('active');
     }
 
@@ -107,7 +110,7 @@
         refs.joinError.textContent = '';
         refs.writeError.textContent = '';
         refs.voteError.textContent = '';
-        refs.factError.textContent = '';
+        refs.eayError.textContent = '';
     }
 
     // ── Join flow ────────────────────────────────────────────────────
@@ -131,12 +134,12 @@
         showScreen('waiting');
     });
 
-    // ── Submit fact (Fan Facts) ──────────────────────────────────────
-    refs.btnFact.addEventListener('click', () => {
+    // ── Submit EAY ANSWER (honest) ───────────────────────────────────
+    refs.btnSubmitEay.addEventListener('click', () => {
         clearErrors();
-        const text = refs.inputFact.value.trim();
-        if (!text) { refs.factError.textContent = 'Share something!'; return; }
-        socket.emit('submit-fact', { text });
+        const text = refs.inputEay.value.trim();
+        if (!text) { refs.eayError.textContent = 'Please answer honestly!'; return; }
+        socket.emit('submit-eay-answer', { text });
     });
 
     // ── Submit lie ───────────────────────────────────────────────────
@@ -162,7 +165,7 @@
         if (screens.join.classList.contains('active')) refs.joinError.textContent = msg;
         else if (screens.write.classList.contains('active')) refs.writeError.textContent = msg;
         else if (screens.vote.classList.contains('active')) refs.voteError.textContent = msg;
-        else if (screens.collectFact.classList.contains('active')) refs.factError.textContent = msg;
+        else if (screens.eayAnswer.classList.contains('active')) refs.eayError.textContent = msg;
         else alert(msg);
     });
 
@@ -175,12 +178,13 @@
                 if (myName) showScreen('waiting');
                 break;
 
-            case 'collect-facts':
+            case 'collect-eay':
                 if (data.submitted) {
-                    showScreen('factSubmitted');
+                    showScreen('eaySubmitted');
                 } else {
-                    showScreen('collectFact');
-                    refs.inputFact.value = '';
+                    showScreen('eayAnswer');
+                    refs.eayPromptText.textContent = data.eayPrompt || 'Loading...';
+                    refs.inputEay.value = '';
                 }
                 break;
 
@@ -195,8 +199,8 @@
                 break;
 
             case 'writing':
-                if (data.isFactOwner) {
-                    showScreen('factOwner');
+                if (data.isSubject) {
+                    showScreen('subject');
                 } else if (data.submitted) {
                     showScreen('submitted');
                 } else {
@@ -208,7 +212,9 @@
                 break;
 
             case 'voting':
-                if (data.voted) {
+                if (data.isSubject) {
+                    showScreen('subjectVoting');
+                } else if (data.voted) {
                     showScreen('voted');
                 } else {
                     showScreen('vote');
@@ -233,6 +239,12 @@
             case 'aboutyou-reveal':
                 showScreen('reveal');
                 refs.ctrlScore.textContent = (data.yourScore || 0).toLocaleString();
+                if (data.reputationBonus > 0) {
+                    refs.ctrlReputation.style.display = 'block';
+                    refs.ctrlReputation.textContent = `⭐ +${data.reputationBonus} REPUTATION BONUS!`;
+                } else {
+                    refs.ctrlReputation.style.display = 'none';
+                }
                 break;
 
             case 'gameover':
@@ -255,7 +267,7 @@
         });
     }
 
-    // ── Render voting options (classic / fan facts) ──────────────────
+    // ── Render voting options (classic / eay) ────────────────────────
     function renderVotingOptions(options) {
         refs.ctrlOptions.innerHTML = '';
         options.forEach(opt => {
