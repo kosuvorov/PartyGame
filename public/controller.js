@@ -182,9 +182,9 @@
                 if (data.submitted) {
                     showScreen('eaySubmitted');
                 } else {
+                    if (!screens.eayAnswer.classList.contains('active')) refs.inputEay.value = '';
                     showScreen('eayAnswer');
                     refs.eayPromptText.textContent = data.eayPrompt || 'Loading...';
-                    refs.inputEay.value = '';
                 }
                 break;
 
@@ -204,10 +204,10 @@
                 } else if (data.submitted) {
                     showScreen('submitted');
                 } else {
+                    if (!screens.write.classList.contains('active')) refs.inputLie.value = '';
                     showScreen('write');
                     refs.roundBadgeW.textContent = roundLabel(data);
                     refs.ctrlPromptW.textContent = data.prompt;
-                    refs.inputLie.value = '';
                 }
                 break;
 
