@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fibbage — Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="ctrl-body">
+
+    <!-- ── JOIN SCREEN ────────────────────────────────── -->
+    <div id="screen-join" class="screen active">
+        <div class="center-col">
+            <h1 class="logo-sm">🎲 FIBBAGE</h1>
+            <div class="join-form">
+                <label class="label">ROOM CODE</label>
+                <input id="input-code" type="text" maxlength="4" class="input-code" placeholder="ABCD"
+                    autocomplete="off" autocapitalize="characters">
+                <label class="label" style="margin-top:1rem;">YOUR NAME</label>
+                <input id="input-name" type="text" maxlength="12" class="input-name" placeholder="Name"
+                    autocomplete="off">
+                <button id="btn-join" class="btn btn-glow" style="margin-top:1.5rem;">Join Game</button>
+                <p id="join-error" class="error-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── WAITING SCREEN ─────────────────────────────── -->
+    <div id="screen-waiting" class="screen">
+        <div class="center-col">
+            <div class="spinner"></div>
+            <p class="waiting-text">Waiting for host to start…</p>
+            <p class="player-name-tag" id="my-name-tag"></p>
+        </div>
+    </div>
+
+    <!-- ── COLLECT FACT (Fan Facts mode) ──────────────── -->
+    <div id="screen-collect-fact" class="screen">
+        <div class="ctrl-card">
+            <span class="phase-label">🎤 Fan Facts</span>
+            <p class="ctrl-prompt">Share something wild that really happened to you!</p>
+            <textarea id="input-fact" class="input-lie" rows="3" maxlength="120"
+                placeholder="e.g. I once got stuck in an elevator with a goat…"></textarea>
+            <button id="btn-submit-fact" class="btn btn-glow">Submit My Fact</button>
+            <p id="fact-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <!-- ── FACT SUBMITTED ─────────────────────────────── -->
+    <div id="screen-fact-submitted" class="screen">
+        <div class="center-col">
+            <div class="check-circle">✓</div>
+            <p class="waiting-text">Fact submitted!</p>
+            <p class="sub-text">Waiting for everyone else…</p>
+        </div>
+    </div>
+
+    <!-- ── WRITING SCREEN ─────────────────────────────── -->
+    <div id="screen-write" class="screen">
+        <div class="ctrl-card">
+            <span class="round-badge" id="ctrl-round-w">Round 1/8</span>
+            <p id="ctrl-prompt-w" class="ctrl-prompt"></p>
+            <textarea id="input-lie" class="input-lie" rows="2" maxlength="80" placeholder="Type your lie…"></textarea>
+            <button id="btn-submit-lie" class="btn btn-glow">Submit</button>
+            <p id="write-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <!-- ── SUBMITTED SCREEN ───────────────────────────── -->
+    <div id="screen-submitted" class="screen">
+        <div class="center-col">
+            <div class="check-circle">✓</div>
+            <p class="waiting-text">Lie submitted!</p>
+            <p class="sub-text">Waiting for other players…</p>
+        </div>
+    </div>
+
+    <!-- ── FACT OWNER WAITING ─────────────────────────── -->
+    <div id="screen-fact-owner" class="screen">
+        <div class="center-col">
+            <div class="fact-owner-badge">⭐</div>
+            <p class="waiting-text">This round is about YOUR fact!</p>
+            <p class="sub-text">Others are writing fake versions…</p>
+        </div>
+    </div>
+
+    <!-- ── VOTING SCREEN ──────────────────────────────── -->
+    <div id="screen-vote" class="screen">
+        <div class="ctrl-card">
+            <span class="round-badge" id="ctrl-round-v">Round 1/8</span>
+            <p id="ctrl-prompt-v" class="ctrl-prompt"></p>
+            <div id="ctrl-options" class="ctrl-options"></div>
+            <p id="vote-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <!-- ── VOTED SCREEN ───────────────────────────────── -->
+    <div id="screen-voted" class="screen">
+        <div class="center-col">
+            <div class="check-circle">✓</div>
+            <p class="waiting-text">Vote locked in!</p>
+            <p class="sub-text">Waiting for results…</p>
+        </div>
+    </div>
+
+    <!-- ── REVEAL SCREEN ──────────────────────────────── -->
+    <div id="screen-ctrl-reveal" class="screen">
+        <div class="center-col">
+            <p class="score-big" id="ctrl-score">0</p>
+            <p class="label">YOUR SCORE</p>
+            <p class="sub-text" style="margin-top:1rem;">Look at the big screen!</p>
+        </div>
+    </div>
+
+    <!-- ── GAME OVER SCREEN ───────────────────────────── -->
+    <div id="screen-ctrl-gameover" class="screen">
+        <div class="center-col">
+            <h2 class="logo-sm">🏆 Game Over!</h2>
+            <p class="score-big" id="ctrl-final-score">0</p>
+            <p class="label">FINAL SCORE</p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="controller.js"></script>
+</body>
+
+</html>

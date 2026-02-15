@@ -1,0 +1,92 @@
+[
+    {
+        "prompt": "In 2024, a city in Japan appointed a ____ as its official tourism ambassador.",
+        "truth": "Pokemon",
+        "category": "Japan"
+    },
+    {
+        "prompt": "NASA once accidentally sold a bag of ____ from the Apollo 11 mission at a government auction.",
+        "truth": "Moon dust",
+        "category": "Space"
+    },
+    {
+        "prompt": "In Switzerland, it is illegal to own just one ____.",
+        "truth": "Guinea pig",
+        "category": "Laws"
+    },
+    {
+        "prompt": "The shortest war in history lasted only ____ minutes.",
+        "truth": "38",
+        "category": "History"
+    },
+    {
+        "prompt": "Oxford University is older than the ____.",
+        "truth": "Aztec Empire",
+        "category": "History"
+    },
+    {
+        "prompt": "A group of flamingos is called a ____.",
+        "truth": "Flamboyance",
+        "category": "Animals"
+    },
+    {
+        "prompt": "The inventor of the Pringles can is buried in one. His name was ____.",
+        "truth": "Fredric Baur",
+        "category": "People"
+    },
+    {
+        "prompt": "In 2006, a woman legally married a ____ in France.",
+        "truth": "Dead man",
+        "category": "Laws"
+    },
+    {
+        "prompt": "Bananas are technically classified as ____.",
+        "truth": "Berries",
+        "category": "Food"
+    },
+    {
+        "prompt": "The national animal of Scotland is the ____.",
+        "truth": "Unicorn",
+        "category": "Countries"
+    },
+    {
+        "prompt": "Cleopatra lived closer in time to ____ than to the building of the Great Pyramid.",
+        "truth": "The Moon landing",
+        "category": "History"
+    },
+    {
+        "prompt": "The longest hiccuping spree lasted ____ years.",
+        "truth": "68",
+        "category": "Records"
+    },
+    {
+        "prompt": "There are more possible iterations of a game of ____ than there are atoms in the observable universe.",
+        "truth": "Chess",
+        "category": "Games"
+    },
+    {
+        "prompt": "Honey never ____.",
+        "truth": "Expires",
+        "category": "Food"
+    },
+    {
+        "prompt": "The first computer programmer was ____, who wrote instructions for a machine in the 1840s.",
+        "truth": "Ada Lovelace",
+        "category": "Tech"
+    },
+    {
+        "prompt": "In Australia, there was once a war fought against ____. The animals won.",
+        "truth": "Emus",
+        "category": "History"
+    },
+    {
+        "prompt": "A jiffy is an actual unit of time equal to ____.",
+        "truth": "1/100th of a second",
+        "category": "Science"
+    },
+    {
+        "prompt": "The dot over the letter 'i' is called a ____.",
+        "truth": "Tittle",
+        "category": "Language"
+    }
+]

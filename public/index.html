@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fibbage — TV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="tv-body">
+
+  <!-- ── INITIAL CREATE ─────────────────────────────── -->
+  <div id="screen-create" class="screen active">
+    <div class="center-col">
+      <h1 class="logo">🎲 FIBBAGE</h1>
+      <p class="subtitle">The Bluffing Party Game</p>
+      <button id="btn-create" class="btn btn-glow">Create Room</button>
+    </div>
+  </div>
+
+  <!-- ── LOBBY ──────────────────────────────────────── -->
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-layout">
+      <div class="lobby-left">
+        <p class="label">ROOM CODE</p>
+        <h2 id="room-code" class="room-code">----</h2>
+        <div id="qr-container" class="qr-container"></div>
+        <p class="join-hint">Scan the QR or go to<br><strong id="join-url"></strong></p>
+
+        <!-- Mode selector -->
+        <div class="mode-selector">
+          <p class="label" style="margin-bottom:.5rem;">GAME MODE</p>
+          <div class="mode-buttons">
+            <button class="btn-mode active" data-mode="classic">🧠 Classic<br><span
+                class="mode-sub">Trivia</span></button>
+            <button class="btn-mode" data-mode="fanfacts">🎤 Fan Facts<br><span class="mode-sub">Your
+                Stories</span></button>
+            <button class="btn-mode" data-mode="aboutyou">👥 About You<br><span class="mode-sub">The
+                Group</span></button>
+          </div>
+        </div>
+
+        <button id="btn-start" class="btn btn-glow" style="margin-top:1.5rem;" disabled>Start Game</button>
+      </div>
+      <div class="lobby-right">
+        <p class="label">PLAYERS</p>
+        <ul id="player-list" class="player-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COLLECT FACTS (Fan Facts) ──────────────────── -->
+  <div id="screen-collect" class="screen">
+    <div class="center-col" style="max-width:600px;">
+      <span class="phase-label">🎤 Collecting Fan Facts…</span>
+      <p class="subtitle">Players are typing their wildest personal stories</p>
+      <div class="submit-tracker">
+        <p id="collect-count">0 / 0 submitted</p>
+        <div class="avatar-row" id="collect-avatars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WRITING PHASE ──────────────────────────────── -->
+  <div id="screen-writing" class="screen">
+    <div class="phase-header">
+      <span class="round-badge" id="round-badge-w">Round 1/8</span>
+      <span class="phase-label">✍️ WRITING</span>
+    </div>
+    <div class="prompt-card">
+      <p id="fact-owner-w" class="fact-owner"></p>
+      <p id="prompt-writing" class="prompt-text"></p>
+    </div>
+    <div class="submit-tracker">
+      <p id="submit-count">0 / 0 submitted</p>
+      <div class="avatar-row" id="submit-avatars"></div>
+    </div>
+  </div>
+
+  <!-- ── VOTING PHASE ───────────────────────────────── -->
+  <div id="screen-voting" class="screen">
+    <div class="phase-header">
+      <span class="round-badge" id="round-badge-v">Round 1/8</span>
+      <span class="phase-label">🗳️ VOTING</span>
+    </div>
+    <div class="prompt-card">
+      <p id="fact-owner-v" class="fact-owner"></p>
+      <p id="prompt-voting" class="prompt-text"></p>
+    </div>
+    <div id="options-list" class="options-grid"></div>
+  </div>
+
+  <!-- ── REVEAL PHASE ───────────────────────────────── -->
+  <div id="screen-reveal" class="screen">
+    <div class="phase-header">
+      <span class="round-badge" id="round-badge-r">Round 1/8</span>
+      <span class="phase-label">🎭 REVEAL</span>
+    </div>
+    <div class="prompt-card">
+      <p id="fact-owner-r" class="fact-owner"></p>
+      <p id="prompt-reveal" class="prompt-text"></p>
+    </div>
+    <div id="reveal-results" class="reveal-grid"></div>
+    <button id="btn-next" class="btn btn-glow" style="margin-top:2rem;">Next Round →</button>
+  </div>
+
+  <!-- ── ABOUT YOU VOTE ─────────────────────────────── -->
+  <div id="screen-aboutyou-vote" class="screen">
+    <div class="phase-header">
+      <span class="round-badge" id="round-badge-av">Round 1/8</span>
+      <span class="phase-label">👥 ABOUT YOU</span>
+    </div>
+    <div class="prompt-card">
+      <p id="prompt-aboutyou" class="prompt-text"></p>
+    </div>
+    <div id="aboutyou-options" class="options-grid"></div>
+  </div>
+
+  <!-- ── ABOUT YOU REVEAL ───────────────────────────── -->
+  <div id="screen-aboutyou-reveal" class="screen">
+    <div class="phase-header">
+      <span class="round-badge" id="round-badge-ar">Round 1/8</span>
+      <span class="phase-label">👥 RESULTS</span>
+    </div>
+    <div class="prompt-card">
+      <p id="prompt-aboutyou-r" class="prompt-text"></p>
+    </div>
+    <div id="aboutyou-results" class="aboutyou-bar-chart"></div>
+    <button id="btn-next-ay" class="btn btn-glow" style="margin-top:2rem;">Next Round →</button>
+  </div>
+
+  <!-- ── GAME OVER ──────────────────────────────────── -->
+  <div id="screen-gameover" class="screen">
+    <h1 class="logo">🏆 Game Over!</h1>
+    <div id="final-scores" class="scoreboard"></div>
+    <button id="btn-restart" class="btn btn-glow" style="margin-top:2rem;">Play Again</button>
+  </div>
+
+  <!-- ── CONFETTI CANVAS ────────────────────────────── -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="qrcode.min.js"></script>
+  <script src="tv.js"></script>
+</body>
+
+</html>
