@@ -1,12 +1,12 @@
 [
     {
         "prompt": "In 2024, a city in Japan appointed a ____ as its official tourism ambassador.",
-        "truth": "Pokemon",
+        "truth": "Godzilla",
         "category": "Japan",
         "decoys": [
+            "Pokemon",
             "Samurai sword",
-            "Bonsai tree",
-            "Anime villain"
+            "Bonsai tree"
         ]
     },
     {
@@ -190,13 +190,733 @@
         ]
     },
     {
-        "prompt": "In 1932, Australia fought and lost a war against a population of ____.",
-        "truth": "Emus",
+        "prompt": "Wombat poop is famously shaped like ____.",
+        "truth": "Cubes",
+        "category": "Animals",
+        "decoys": [
+            "Stars",
+            "Pyramids",
+            "Hearts"
+        ]
+    },
+    {
+        "prompt": "Cotton Candy was surprisingly invented by a ____.",
+        "truth": "Dentist",
+        "category": "Irony",
+        "decoys": [
+            "Clown",
+            "Sugar addict",
+            "Child"
+        ]
+    },
+    {
+        "prompt": "The first item ever sold on eBay was a broken ____.",
+        "truth": "Laser pointer",
+        "category": "Internet",
+        "decoys": [
+            "Toaster",
+            "Walkman",
+            "Pez dispenser"
+        ]
+    },
+    {
+        "prompt": "In the 1830s, ketchup was sold as medicine to cure ____.",
+        "truth": "Diarrhea",
+        "category": "Medicine",
+        "decoys": [
+            "Baldness",
+            "The Plague",
+            "Bad breath"
+        ]
+    },
+    {
+        "prompt": "A single strand of spaghetti is technically called a ____.",
+        "truth": "Spaghetto",
+        "category": "Language",
+        "decoys": [
+            "Noodlino",
+            "Strandini",
+            "Spaghett"
+        ]
+    },
+    {
+        "prompt": "The Chainsaw was originally invented to help with ____.",
+        "truth": "Childbirth",
         "category": "History",
         "decoys": [
-            "Rabbits",
-            "Possums",
-            "Crocodiles"
+            "Ice sculpture",
+            "Torture",
+            "Butchery"
+        ]
+    },
+    {
+        "prompt": "The fear of long words is called ____.",
+        "truth": "Hippopotomonstrosesquippedaliophobia",
+        "category": "Irony",
+        "decoys": [
+            "Longusphobia",
+            "Verbosophobia",
+            "Gigantolexophobia"
+        ]
+    },
+    {
+        "prompt": "The mascot of Pringles is a character named ____.",
+        "truth": "Julius Pringles",
+        "category": "Brands",
+        "decoys": [
+            "Mr. Crunch",
+            "Poppin' Pete",
+            "Chip Chipson"
+        ]
+    },
+    {
+        "prompt": "Before it was a game, Nintendo was founded in 1889 to sell ____.",
+        "truth": "Playing cards",
+        "category": "Games",
+        "decoys": [
+            "Rice",
+            "Taxis",
+            "Love hotels"
+        ]
+    },
+    {
+        "prompt": "It is illegal to handle a ____ in suspicious circumstances in the UK.",
+        "truth": "Salmon",
+        "category": "Laws",
+        "decoys": [
+            "Teapot",
+            "Badger",
+            "Picture of the Queen"
+        ]
+    },
+    {
+        "prompt": "The tiny plastic piece at the end of a shoelace is called an ____.",
+        "truth": "Aglet",
+        "category": "Objects",
+        "decoys": [
+            "Tiplet",
+            "Nubbin",
+            "Lace-cap"
+        ]
+    },
+    {
+        "prompt": "A group of pugs is collectively known as a ____.",
+        "truth": "Grumble",
+        "category": "Animals",
+        "decoys": [
+            "Snort",
+            "Wrinkle",
+            "Puggle"
+        ]
+    },
+    {
+        "prompt": "The state vegetable of Oklahoma is the ____.",
+        "truth": "Watermelon",
+        "category": "USA",
+        "decoys": [
+            "Corn",
+            "Potato",
+            "Okra"
+        ]
+    },
+    {
+        "prompt": "Only two mammals like spicy food: humans and the ____.",
+        "truth": "Tree shrew",
+        "category": "Animals",
+        "decoys": [
+            "Raccoon",
+            "Honey badger",
+            "Capybara"
+        ]
+    },
+    {
+        "prompt": "In 1923, jockey Frank Hayes won a race at Belmont Park despite being ____.",
+        "truth": "Dead",
+        "category": "Sports",
+        "decoys": [
+            "Blind",
+            "Asleep",
+            "Drunk"
+        ]
+    },
+    {
+        "prompt": "The Hawaiian pizza was actually invented in ____.",
+        "truth": "Canada",
+        "category": "Food",
+        "decoys": [
+            "Hawaii",
+            "Italy",
+            "California"
+        ]
+    },
+    {
+        "prompt": "The original name for the search engine Google was ____.",
+        "truth": "BackRub",
+        "category": "Tech",
+        "decoys": [
+            "WebCrawler",
+            "Searchy",
+            "The Blob"
+        ]
+    },
+    {
+        "prompt": "Octopuses have three ____.",
+        "truth": "Hearts",
+        "category": "Biology",
+        "decoys": [
+            "Brains",
+            "Stomachs",
+            "Lungs"
+        ]
+    },
+    {
+        "prompt": "The inventor of the Frisbee was turned into a ____ after he died.",
+        "truth": "Frisbee",
+        "category": "Irony",
+        "decoys": [
+            "Tree",
+            "Statue",
+            "Bowling ball"
+        ]
+    },
+    {
+        "prompt": "In the 17th century, wealthy Europeans ate ____ as medicine.",
+        "truth": "Mummies",
+        "category": "History",
+        "decoys": [
+            "Gold",
+            "Dirt",
+            "Rotten eggs"
+        ]
+    },
+    {
+        "prompt": "The lyrebird can mimic almost any sound, including ____.",
+        "truth": "Chainsaws",
+        "category": "Animals",
+        "decoys": [
+            "Human speech",
+            "Explosions",
+            "Gunshots"
+        ]
+    },
+    {
+        "prompt": "High heels were originally invented for ____.",
+        "truth": "Men",
+        "category": "Fashion",
+        "decoys": [
+            "Horses",
+            "Butchers",
+            "Clowns"
+        ]
+    },
+    {
+        "prompt": "Dr. Seuss invented the word ____.",
+        "truth": "Nerd",
+        "category": "Language",
+        "decoys": [
+            "Grumps",
+            "Zany",
+            "Bloop"
+        ]
+    },
+    {
+        "prompt": "The total weight of all the ____ on Earth is greater than the weight of all the humans.",
+        "truth": "Ants",
+        "category": "Nature",
+        "decoys": [
+            "Cows",
+            "Spiders",
+            "Worms"
+        ]
+    },
+    {
+        "prompt": "The first webcam was invented at Cambridge University to monitor a ____.",
+        "truth": "Coffee pot",
+        "category": "Tech",
+        "decoys": [
+            "Hamster",
+            "Vending machine",
+            "Server room"
+        ]
+    },
+    {
+        "prompt": "Slug noses are weird because they have ____ of them.",
+        "truth": "Four",
+        "category": "Animals",
+        "decoys": [
+            "Zero",
+            "Two",
+            "Ten"
+        ]
+    },
+    {
+        "prompt": "Bubble wrap was originally invented to be ____.",
+        "truth": "Wallpaper",
+        "category": "Inventions",
+        "decoys": [
+            "Insulation",
+            "Carpet",
+            "Clothing"
+        ]
+    },
+    {
+        "prompt": "The Eiffel Tower can grow more than 6 inches in summer due to ____.",
+        "truth": "Thermal expansion",
+        "category": "Science",
+        "decoys": [
+            "Humidity",
+            "Tourism",
+            "Rust"
+        ]
+    },
+    {
+        "prompt": "A flock of crows is known as a ____.",
+        "truth": "Murder",
+        "category": "Animals",
+        "decoys": [
+            "Death",
+            "Shadow",
+            "Plot"
+        ]
+    },
+    {
+        "prompt": "The real name of the Cookie Monster is ____.",
+        "truth": "Sid",
+        "category": "TV",
+        "decoys": [
+            "Barnaby",
+            "Crumbs",
+            "Walter"
+        ]
+    },
+    {
+        "prompt": "Before alarm clocks, people paid 'knocker-uppers' to wake them up by shooting ____ at their windows.",
+        "truth": "Peas",
+        "category": "Jobs",
+        "decoys": [
+            "Rocks",
+            "Water",
+            "Arrows"
+        ]
+    },
+    {
+        "prompt": "A duel between three people is called a ____.",
+        "truth": "Truel",
+        "category": "Language",
+        "decoys": [
+            "Tri-fight",
+            "Threeway",
+            "Triangle"
+        ]
+    },
+    {
+        "prompt": "In 1998, Sony accidentally sold 700,000 camcorders that could ____.",
+        "truth": "See through clothes",
+        "category": "Tech",
+        "decoys": [
+            "Record ghosts",
+            "Explode",
+            "Fly"
+        ]
+    },
+    {
+        "prompt": "The 'hashtags' symbol (#) is technically called an ____.",
+        "truth": "Octothorpe",
+        "category": "Language",
+        "decoys": [
+            "Pound sign",
+            "Cross-hatch",
+            "Grid"
+        ]
+    },
+    {
+        "prompt": "Human thigh bones are stronger than ____.",
+        "truth": "Concrete",
+        "category": "Biology",
+        "decoys": [
+            "Steel",
+            "Iron",
+            "Wood"
+        ]
+    },
+    {
+        "prompt": "The longest place name in the world has ____ letters.",
+        "truth": "85",
+        "category": "Geography",
+        "decoys": [
+            "42",
+            "103",
+            "64"
+        ]
+    },
+    {
+        "prompt": "A baby puffin is called a ____.",
+        "truth": "Puffling",
+        "category": "Animals",
+        "decoys": [
+            "Puffball",
+            "Chick",
+            "Puff-puff"
+        ]
+    },
+    {
+        "prompt": "To prevent lust, Sylvester Graham invented the ____.",
+        "truth": "Graham Cracker",
+        "category": "Food",
+        "decoys": [
+            "Corn Flake",
+            "Cold shower",
+            "Belt"
+        ]
+    },
+    {
+        "prompt": "A cloud can weigh more than a ____.",
+        "truth": "Million pounds",
+        "category": "Science",
+        "decoys": [
+            "Car",
+            "House",
+            "Whale"
+        ]
+    },
+    {
+        "prompt": "The electric chair was invented by a ____.",
+        "truth": "Dentist",
+        "category": "Inventions",
+        "decoys": [
+            "Electrician",
+            "Judge",
+            "Executioner"
+        ]
+    },
+    {
+        "prompt": "In 1912, a man invented a parachute coat and tested it by jumping off the Eiffel Tower. He ____.",
+        "truth": "Died",
+        "category": "History",
+        "decoys": [
+            "Flew",
+            "Bounced",
+            "Got arrested"
+        ]
+    },
+    {
+        "prompt": "The King of Hearts is the only king in a deck of cards without a ____.",
+        "truth": "Mustache",
+        "category": "Games",
+        "decoys": [
+            "Sword",
+            "Crown",
+            "Beard"
+        ]
+    },
+    {
+        "prompt": "During the Cold War, the CIA tried to use ____ as spies.",
+        "truth": "Cats",
+        "category": "History",
+        "decoys": [
+            "Pigeons",
+            "Dolphins",
+            "Monkeys"
+        ]
+    },
+    {
+        "prompt": "Space smells like ____.",
+        "truth": "Seared steak",
+        "category": "Space",
+        "decoys": [
+            "Burnt toast",
+            "Sulfur",
+            "Nothing"
+        ]
+    },
+    {
+        "prompt": "Cows have best friends and get ____ when separated.",
+        "truth": "Stressed",
+        "category": "Animals",
+        "decoys": [
+            "Angry",
+            "Violent",
+            "Hungry"
+        ]
+    },
+    {
+        "prompt": "The 'M's in M&Ms stand for ____.",
+        "truth": "Mars and Murrie",
+        "category": "Food",
+        "decoys": [
+            "Melt and Mouth",
+            "Milk and More",
+            "Mini and Mega"
+        ]
+    },
+    {
+        "prompt": "Until 2011, Russia classified beer as a ____.",
+        "truth": "Soft drink",
+        "category": "Laws",
+        "decoys": [
+            "Vegetable",
+            "Medicine",
+            "Soup"
+        ]
+    },
+    {
+        "prompt": "A snail can sleep for ____.",
+        "truth": "3 years",
+        "category": "Animals",
+        "decoys": [
+            "3 days",
+            "3 weeks",
+            "3 months"
+        ]
+    },
+    {
+        "prompt": "If you keep a goldfish in a dark room, it will turn ____.",
+        "truth": "White",
+        "category": "Animals",
+        "decoys": [
+            "Black",
+            "Green",
+            "Transparent"
+        ]
+    },
+    {
+        "prompt": "The first text message ever sent said '____'.",
+        "truth": "Merry Christmas",
+        "category": "Tech",
+        "decoys": [
+            "Hello World",
+            "Watson, come here",
+            "Test"
+        ]
+    },
+    {
+        "prompt": "Humans share 50% of their DNA with ____.",
+        "truth": "Bananas",
+        "category": "Biology",
+        "decoys": [
+            "Cats",
+            "Trees",
+            "Slugs"
+        ]
+    },
+    {
+        "prompt": "The plastic thing in the middle of a pizza box is called a ____.",
+        "truth": "Pizza saver",
+        "category": "Objects",
+        "decoys": [
+            "Table",
+            "Cheese guard",
+            "Box prop"
+        ]
+    },
+    {
+        "prompt": "Bees can fly higher than ____.",
+        "truth": "Mount Everest",
+        "category": "Animals",
+        "decoys": [
+            "Clouds",
+            "Planes",
+            "Birds"
+        ]
+    },
+    {
+        "prompt": "In France, you can marry a posthumous partner if you prove ____.",
+        "truth": "You planned to marry",
+        "category": "Laws",
+        "decoys": [
+            "You are pregnant",
+            "You are rich",
+            "You are sad"
+        ]
+    },
+    {
+        "prompt": "The ZIP in ZIP code stands for ____.",
+        "truth": "Zone Improvement Plan",
+        "category": "USA",
+        "decoys": [
+            "Zoom In Post",
+            "Zone Index Post",
+            "Zip It Please"
+        ]
+    },
+    {
+        "prompt": "A single cloud can weigh more than 1 million ____.",
+        "truth": "Pounds",
+        "category": "Science",
+        "decoys": [
+            "Ounces",
+            "Kilograms",
+            "Tons"
+        ]
+    },
+    {
+        "prompt": "The unicorn is the national animal of ____.",
+        "truth": "Scotland",
+        "category": "Geography",
+        "decoys": [
+            "Wales",
+            "Ireland",
+            "Narnia"
+        ]
+    },
+    {
+        "prompt": "Blue whales eat half a million calories in one ____.",
+        "truth": "Mouthful",
+        "category": "Animals",
+        "decoys": [
+            "Day",
+            "Week",
+            "Month"
+        ]
+    },
+    {
+        "prompt": "Fried tarantulas are a delicacy in ____.",
+        "truth": "Cambodia",
+        "category": "Food",
+        "decoys": [
+            "Thailand",
+            "Vietnam",
+            "China"
+        ]
+    },
+    {
+        "prompt": "The 100 folds in a chef's hat represent 100 ways to cook ____.",
+        "truth": "Eggs",
+        "category": "Food",
+        "decoys": [
+            "Chicken",
+            "Potatoes",
+            "Soup"
+        ]
+    },
+    {
+        "prompt": "Ketchup was once sold as a cure for ____.",
+        "truth": "Indigestion",
+        "category": "History",
+        "decoys": [
+            "Headaches",
+            "Colds",
+            "Fever"
+        ]
+    },
+    {
+        "prompt": "Ancient Romans used crushed mouse brains as ____.",
+        "truth": "Toothpaste",
+        "category": "History",
+        "decoys": [
+            "Makeup",
+            "Glue",
+            "Medicine"
+        ]
+    },
+    {
+        "prompt": "Before toilet paper was invented, Americans used ____.",
+        "truth": "Corn cobs",
+        "category": "History",
+        "decoys": [
+            "Leaves",
+            "Rags",
+            "Sponges"
+        ]
+    },
+    {
+        "prompt": "An ostrich's eye is bigger than its ____.",
+        "truth": "Brain",
+        "category": "Animals",
+        "decoys": [
+            "Heart",
+            "Stomach",
+            "Beak"
+        ]
+    },
+    {
+        "prompt": "The longest time between two twins being born is ____.",
+        "truth": "87 days",
+        "category": "Records",
+        "decoys": [
+            "2 days",
+            "1 week",
+            "24 hours"
+        ]
+    },
+    {
+        "prompt": "Crows can recognize human ____.",
+        "truth": "Faces",
+        "category": "Animals",
+        "decoys": [
+            "Voices",
+            "Cars",
+            "Walks"
+        ]
+    },
+    {
+        "prompt": "Polar bear skin is actually ____.",
+        "truth": "Black",
+        "category": "Animals",
+        "decoys": [
+            "Pink",
+            "White",
+            "Grey"
+        ]
+    },
+    {
+        "prompt": "A group of porcupines is called a ____.",
+        "truth": "Prickle",
+        "category": "Animals",
+        "decoys": [
+            "Spike",
+            "Poker",
+            "Needle"
+        ]
+    },
+    {
+        "prompt": "It is illegal to wear a suit of armor in the British ____.",
+        "truth": "Parliament",
+        "category": "Laws",
+        "decoys": [
+            "Pub",
+            "Street",
+            "Park"
+        ]
+    },
+    {
+        "prompt": "Most wasabi sold in the US is actually colored ____.",
+        "truth": "Horseradish",
+        "category": "Food",
+        "decoys": [
+            "Mustard",
+            "Ginger",
+            "Radish"
+        ]
+    },
+    {
+        "prompt": "The cigarette lighter was invented before the ____.",
+        "truth": "Match",
+        "category": "Inventions",
+        "decoys": [
+            "Wheel",
+            "Lightbulb",
+            "Telephone"
+        ]
+    },
+    {
+        "prompt": "Nutella was invented during WWII due to a shortage of ____.",
+        "truth": "Cocoa",
+        "category": "Food",
+        "decoys": [
+            "Sugar",
+            "Milk",
+            "Butter"
+        ]
+    },
+    {
+        "prompt": "Tigers have striped skin, not just striped ____.",
+        "truth": "Fur",
+        "category": "Animals",
+        "decoys": [
+            "Tongues",
+            "Eyes",
+            "Claws"
         ]
     }
 ]

@@ -146,5 +146,353 @@
     {
         "prompt": "Which player would survive the shortest amount of time in the wild?",
         "category": "Survival"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret alter ego on the internet?",
+        "category": "Secrets"
+    },
+    {
+        "prompt": "Which player would accidentally reply 'I love you' to their boss?",
+        "category": "Awkward"
+    },
+    {
+        "prompt": "Which player would win a hot dog eating contest?",
+        "category": "Food"
+    },
+    {
+        "prompt": "Which player is most likely to have a conversation with a telemarketer for 30 minutes?",
+        "category": "Polite"
+    },
+    {
+        "prompt": "Which player would accidentally leak their own nudes?",
+        "category": "Tech"
+    },
+    {
+        "prompt": "Which player is most likely to fake their own death to get out of a dinner party?",
+        "category": "Drama"
+    },
+    {
+        "prompt": "Which player would be the benevolent dictator of a small island nation?",
+        "category": "Power"
+    },
+    {
+        "prompt": "Which player is most likely to get a tattoo of a meme?",
+        "category": "Regret"
+    },
+    {
+        "prompt": "Which player would accidentally become a local celebrity in a foreign country?",
+        "category": "Charisma"
+    },
+    {
+        "prompt": "Which player is most likely to sleep through an earthquake?",
+        "category": "Sleep"
+    },
+    {
+        "prompt": "Which player would be the first to touch a button that says 'DO NOT TOUCH'?",
+        "category": "Curiosity"
+    },
+    {
+        "prompt": "Which player is most likely to cry over a commercial involving a dog?",
+        "category": "Emotion"
+    },
+    {
+        "prompt": "Which player would negotiate a peace treaty with aliens?",
+        "category": "Diplomacy"
+    },
+    {
+        "prompt": "Which player is most likely to have a burner phone?",
+        "category": "Shady"
+    },
+    {
+        "prompt": "Which player would accidentally burn the kitchen down while boiling water?",
+        "category": "Cooking"
+    },
+    {
+        "prompt": "Which player is most likely to hold a grudge for 20 years over $5?",
+        "category": "Petty"
+    },
+    {
+        "prompt": "Which player is most likely to believe a conspiracy theory they saw on TikTok?",
+        "category": "Gullible"
+    },
+    {
+        "prompt": "Which player would dramatically quit their job in a viral video?",
+        "category": "Work"
+    },
+    {
+        "prompt": "Which player is most likely to own an exotic animal illegally?",
+        "category": "Wild"
+    },
+    {
+        "prompt": "Which player would accidentally insult a celebrity to their face?",
+        "category": "Foot in Mouth"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret stash of cash buried in the backyard?",
+        "category": "Paranoid"
+    },
+    {
+        "prompt": "Which player would be the first to suggest we eat the weak one if we get stranded?",
+        "category": "Dark"
+    },
+    {
+        "prompt": "Which player is most likely to show up to a wedding in jeans?",
+        "category": "Fashion"
+    },
+    {
+        "prompt": "Which player would get lost in their own neighborhood?",
+        "category": "Direction"
+    },
+    {
+        "prompt": "Which player is most likely to be an undercover alien observing humans?",
+        "category": "Weird"
+    },
+    {
+        "prompt": "Which player would start a podcast that nobody listens to?",
+        "category": "Ego"
+    },
+    {
+        "prompt": "Which player is most likely to laugh at a funeral?",
+        "category": "Inappropriate"
+    },
+    {
+        "prompt": "Which player would accidentally help a bank robber escape?",
+        "category": "Clueless"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret family in another state?",
+        "category": "Scandal"
+    },
+    {
+        "prompt": "Which player would be the best getaway driver?",
+        "category": "Skill"
+    },
+    {
+        "prompt": "Which player would try to pet a bear?",
+        "category": "Danger"
+    },
+    {
+        "prompt": "Which player is most likely to become a hermit and live in a cave?",
+        "category": "Anti-Social"
+    },
+    {
+        "prompt": "Which player would accidentally send a screenshot of a chat TO the person they were talking about?",
+        "category": "Tech Fail"
+    },
+    {
+        "prompt": "Which player is most likely to lie to the police just for fun?",
+        "category": "Chaos"
+    },
+    {
+        "prompt": "Which player is most likely to have the weirdest search history?",
+        "category": "Internet"
+    },
+    {
+        "prompt": "Which player would accidentally join a pyramid scheme?",
+        "category": "Money"
+    },
+    {
+        "prompt": "Which player would be the first to suggest doing shots on a Tuesday morning?",
+        "category": "Party"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret shrine to themselves?",
+        "category": "Vanity"
+    },
+    {
+        "prompt": "Which player would act as their own lawyer in court and lose immediately?",
+        "category": "Confidence"
+    },
+    {
+        "prompt": "Which player is most likely to spoil a movie ending on purpose?",
+        "category": "Evil"
+    },
+    {
+        "prompt": "Which player is most likely to get catfished?",
+        "category": "Love"
+    },
+    {
+        "prompt": "Which player would accidentally invite a burglar into their house?",
+        "category": "Naive"
+    },
+    {
+        "prompt": "Which player is most likely to fake an illness to leave a party early?",
+        "category": "Social"
+    },
+    {
+        "prompt": "Which player would spend their last $10 on a lottery ticket?",
+        "category": "Gambling"
+    },
+    {
+        "prompt": "Which player is most likely to name their child something ridiculous?",
+        "category": "Parenting"
+    },
+    {
+        "prompt": "Which player would get kicked out of a library for being too loud?",
+        "category": "Loud"
+    },
+    {
+        "prompt": "Which player is most likely to eat food out of the trash?",
+        "category": "Gross"
+    },
+    {
+        "prompt": "Which player would accidentally kidnap someone?",
+        "category": "Mistake"
+    },
+    {
+        "prompt": "Which player is most likely to use a fake accent to impress a date?",
+        "category": "Dating"
+    },
+    {
+        "prompt": "Which player would be the villain in a Disney movie?",
+        "category": "Personality"
+    },
+    {
+        "prompt": "Which player is most likely to owe money to the mob?",
+        "category": "Danger"
+    },
+    {
+        "prompt": "Which player would accidentally start a fire trying to be romantic?",
+        "category": "Romance"
+    },
+    {
+        "prompt": "Which player is most likely to drop their phone in the toilet?",
+        "category": "Clumsy"
+    },
+    {
+        "prompt": "Which player is most likely to have an imaginary friend as an adult?",
+        "category": "Weird"
+    },
+    {
+        "prompt": "Which player would survive a zombie apocalypse purely by hiding?",
+        "category": "Cowardice"
+    },
+    {
+        "prompt": "Which player would accidentally wear pajamas to a job interview?",
+        "category": "Oblivious"
+    },
+    {
+        "prompt": "Which player is most likely to get banned from a public park?",
+        "category": "Nuisance"
+    },
+    {
+        "prompt": "Which player would try to fight a kangaroo?",
+        "category": "Brave/Stupid"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret talent for opera singing?",
+        "category": "Talent"
+    },
+    {
+        "prompt": "Which player would accidentally join a biker gang?",
+        "category": "Misunderstanding"
+    },
+    {
+        "prompt": "Which player is most likely to forget to pick their kids up from school?",
+        "category": "Responsible"
+    },
+    {
+        "prompt": "Which player would be the first to die in a survival situation?",
+        "category": "Weakness"
+    },
+    {
+        "prompt": "Which player is most likely to have a pristine collection of action figures?",
+        "category": "Hobby"
+    },
+    {
+        "prompt": "Which player would accidentally ruin a surprise party by screaming?",
+        "category": "Startled"
+    },
+    {
+        "prompt": "Which player is most likely to become a motivational speaker despite having no motivation?",
+        "category": "Irony"
+    },
+    {
+        "prompt": "Which player would try to bribe a police officer with gum?",
+        "category": "Panic"
+    },
+    {
+        "prompt": "Which player is most likely to lock themselves out of their car while it's running?",
+        "category": "Focus"
+    },
+    {
+        "prompt": "Which player would be the best person to rob a bank with?",
+        "category": "Trust"
+    },
+    {
+        "prompt": "Which player is most likely to have a crush on a cartoon character?",
+        "category": "Love"
+    },
+    {
+        "prompt": "Which player would accidentally volunteer for a one-way trip to Mars?",
+        "category": "Space"
+    },
+    {
+        "prompt": "Which player is most likely to fall asleep at a rock concert?",
+        "category": "Tired"
+    },
+    {
+        "prompt": "Which player would be the mastermind behind a major heist?",
+        "category": "Smart"
+    },
+    {
+        "prompt": "Which player is most likely to eat something they are allergic to just to be polite?",
+        "category": "Polite"
+    },
+    {
+        "prompt": "Which player would accidentally create a viral TikTok dance?",
+        "category": "Fame"
+    },
+    {
+        "prompt": "Which player is most likely to have a secret bunker?",
+        "category": "Prepared"
+    },
+    {
+        "prompt": "Which player would try to argue with a vending machine?",
+        "category": "Anger"
+    },
+    {
+        "prompt": "Which player is most likely to show up at the wrong airport?",
+        "category": "Travel"
+    },
+    {
+        "prompt": "Which player would accidentally reveal a state secret?",
+        "category": "Loose Lips"
+    },
+    {
+        "prompt": "Which player is most likely to become a stand-up comedian?",
+        "category": "Funny"
+    },
+    {
+        "prompt": "Which player would try to domesticate a raccoon?",
+        "category": "Animals"
+    },
+    {
+        "prompt": "Which player is most likely to get a restraining order from a celebrity?",
+        "category": "Obsessed"
+    },
+    {
+        "prompt": "Which player would accidentally send a text about someone TO that person?",
+        "category": "Awkward"
+    },
+    {
+        "prompt": "Which player is most likely to be a ghost in their next life?",
+        "category": "Spiritual"
+    },
+    {
+        "prompt": "Which player would try to pay with Monopoly money?",
+        "category": "Confused"
+    },
+    {
+        "prompt": "Which player is most likely to cry during a comedy movie?",
+        "category": "Emotional"
+    },
+    {
+        "prompt": "Which player would accidentally become a meme?",
+        "category": "Internet"
+    },
+    {
+        "prompt": "Which player is most likely to have the messiest car?",
+        "category": "Cleanliness"
     }
 ]
