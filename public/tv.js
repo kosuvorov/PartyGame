@@ -65,10 +65,7 @@
         btnControlsToggle: document.getElementById('btn-controls-toggle'),
         hostSidebar: document.getElementById('host-sidebar'),
         btnSidebarClose: document.getElementById('btn-sidebar-close'),
-        bgMusic: document.getElementById('bg-music'),
-        btnMusicPlay: document.getElementById('btn-music-play'),
-        btnMusicPause: document.getElementById('btn-music-pause'),
-        musicVol: document.getElementById('music-vol'),
+
         btnEndEarly: document.getElementById('btn-end-early'),
         btnReroll: document.getElementById('btn-reroll'),
         sidebarLeaderboard: document.getElementById('sidebar-leaderboard'),
@@ -112,21 +109,7 @@
     refs.btnControlsToggle.addEventListener('click', () => refs.hostSidebar.classList.add('active'));
     refs.btnSidebarClose.addEventListener('click', () => refs.hostSidebar.classList.remove('active'));
 
-    // Music
-    refs.bgMusic.volume = 0.3;
-    refs.btnMusicPlay.addEventListener('click', () => {
-        refs.bgMusic.play().catch(e => console.log('Playback prevented', e));
-        refs.btnMusicPlay.style.display = 'none';
-        refs.btnMusicPause.style.display = 'inline-block';
-    });
-    refs.btnMusicPause.addEventListener('click', () => {
-        refs.bgMusic.pause();
-        refs.btnMusicPause.style.display = 'none';
-        refs.btnMusicPlay.style.display = 'inline-block';
-    });
-    refs.musicVol.addEventListener('input', (e) => {
-        refs.bgMusic.volume = e.target.value;
-    });
+
 
     // End Game Early
     refs.btnEndEarly.addEventListener('click', () => {
