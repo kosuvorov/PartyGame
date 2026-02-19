@@ -74,8 +74,10 @@ function normalize(str) {
 
 function getPlayers(room) {
   const players = [];
-  room.players.forEach((p, id) => {
-    players.push({ id, name: p.name, score: p.score, avatar: p.avatar, connected: p.connected });
+  // Use playerOrder for stable, consistent ordering
+  room.playerOrder.forEach(id => {
+    const p = room.players.get(id);
+    if (p) players.push({ id, name: p.name, score: p.score, avatar: p.avatar, connected: p.connected });
   });
   return players;
 }
@@ -254,7 +256,7 @@ function broadcastState(room) {
         cd.prompt = room.currentQuestion.prompt;
         cd.category = room.currentQuestion.category;
         cd.submitted = player.lie !== null;
-        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+        if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) {
           cd.isSubject = true;
           cd.submitted = true;
         }
@@ -263,7 +265,7 @@ function broadcastState(room) {
       case 'voting': {
         cd.prompt = room.currentQuestion.prompt;
         // Subject doesn't vote in EAY mode
-        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+        if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) {
           cd.isSubject = true;
           cd.voted = true; // they don't vote
         } else {
@@ -279,7 +281,7 @@ function broadcastState(room) {
         cd.results = buildRevealResults(room);
         cd.truthIndex = room.truthIndex;
         cd.prompt = room.currentQuestion.prompt;
-        if (room.mode === 'eay' && socketId === room.currentSubjectId) {
+        if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) {
           cd.isSubject = true;
           const correctCount = (room.votes.get(room.truthIndex) || []).length;
           cd.reputationBonus = correctCount * 1000;
@@ -456,7 +458,7 @@ function calculateAboutYouScores(room) {
 function checkAllSubmitted(room) {
   let allSubmitted = true;
   room.players.forEach((p, id) => {
-    if (room.mode === 'eay' && id === room.currentSubjectId) return;
+    if (room.mode === 'eay' && p.name === room.currentQuestion.subjectName) return;
     if (p.lie === null) allSubmitted = false;
   });
   return allSubmitted;
@@ -630,7 +632,7 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (!player) return;
     if (player.lie !== null) return socket.emit('error-msg', 'Already submitted.');
-    if (room.mode === 'eay' && socket.id === room.currentSubjectId) return;
+    if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) return;
 
     const cleaned = (text || '').trim();
     if (!cleaned) return socket.emit('error-msg', 'Cannot be empty.');
@@ -661,6 +663,7 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (!player) return;
     if (player.lie !== null) return socket.emit('error-msg', 'Already submitted.');
+    if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) return;
 
     const q = room.currentQuestion;
     const decoys = q.decoys || [];
@@ -695,7 +698,7 @@ io.on('connection', (socket) => {
 
     if (room.phase === 'voting') {
       // Subject can't vote in EAY
-      if (room.mode === 'eay' && socket.id === room.currentSubjectId) return;
+      if (room.mode === 'eay' && player.name === room.currentQuestion.subjectName) return;
 
       const opt = room.options[optionIndex];
       if (opt && opt.authorId === socket.id) return socket.emit('error-msg', "You can't vote for your own lie!");
@@ -737,6 +740,89 @@ io.on('connection', (socket) => {
     } else {
       startRound(room);
     }
+  });
+
+  // ── REROLL QUESTION ──────────────────────────────
+  socket.on('reroll-question', () => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.hostId !== socket.id) return;
+    if (room.phase !== 'writing' && room.phase !== 'aboutyou-vote') return;
+
+    let newQ = null;
+
+    if (room.mode === 'classic') {
+      // Pick another question from the same category pool
+      const cat = room.currentQuestion.category;
+      newQ = pickQuestionFromCategory(room, cat);
+      // If that category is exhausted, try any category
+      if (!newQ) {
+        const available = Object.keys(room.questionPool).filter(c => room.questionPool[c].length > 0);
+        if (available.length > 0) {
+          newQ = pickQuestionFromCategory(room, available[0]);
+        }
+      }
+    } else if (room.mode === 'aboutyou') {
+      // Swap current question with one from later in the shuffled list
+      const remaining = room.questions.slice(room.round + 1);
+      if (remaining.length > 0) {
+        // Move current question to the end and bring the next one forward
+        const skipped = room.questions.splice(room.round, 1)[0];
+        room.questions.push(skipped); // push to end so it might appear later
+        newQ = room.questions[room.round]; // the one that slid into this slot
+      }
+    } else if (room.mode === 'eay') {
+      return socket.emit('error-msg', 'Cannot reroll in Enough About You — questions are personal!');
+    }
+
+    if (newQ) {
+      room.currentQuestion = newQ;
+      // Reset player submissions and votes since the question changed
+      room.votes = new Map();
+      room.players.forEach(p => {
+        p.lie = null;
+        p.vote = null;
+        p.usedLieForMe = false;
+      });
+      broadcastState(room);
+    } else {
+      socket.emit('error-msg', 'No more questions available to reroll!');
+    }
+  });
+
+  // ── KICK PLAYER ──────────────────────────────────
+  socket.on('kick-player', ({ targetName }) => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.hostId !== socket.id) return;
+
+    // Find the player by name
+    let targetId = null;
+    room.players.forEach((p, id) => {
+      if (p.name === targetName) targetId = id;
+    });
+    if (!targetId) return;
+
+    const player = room.players.get(targetId);
+    if (player && player.token) tokenToRoom.delete(player.token);
+    room.players.delete(targetId);
+    const orderIdx = room.playerOrder.indexOf(targetId);
+    if (orderIdx !== -1) room.playerOrder.splice(orderIdx, 1);
+
+    // Notify the kicked player
+    io.to(targetId).emit('error-msg', 'You have been removed from the game by the host.');
+
+    broadcastState(room);
+  });
+
+  // ── END GAME EARLY ───────────────────────────────
+  socket.on('end-game-early', () => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.hostId !== socket.id) return;
+
+    room.phase = 'gameover';
+    broadcastState(room);
   });
 
   // ── RESTART ──────────────────────────────────────

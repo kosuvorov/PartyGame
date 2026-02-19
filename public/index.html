@@ -12,6 +12,47 @@
 
 <body class="tv-body">
 
+  <!-- ── HOST CONTROLS ─────────────────────────────── -->
+  <button id="btn-controls-toggle" class="btn-controls-toggle" title="Host Controls">⚙️</button>
+
+  <div id="host-sidebar" class="host-sidebar">
+    <div class="sidebar-header">
+      <h3>Host Controls</h3>
+      <button id="btn-sidebar-close" class="btn-icon">✕</button>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>🎵 Music</h4>
+      <audio id="bg-music" loop>
+        <source src="music/track1.mp3" type="audio/mpeg">
+      </audio>
+      <div class="music-controls">
+        <button id="btn-music-play" class="btn-small">▶ Play</button>
+        <button id="btn-music-pause" class="btn-small" style="display:none;">⏸ Pause</button>
+      </div>
+      <div class="volume-control">
+        <label>Volume</label>
+        <input type="range" id="music-vol" min="0" max="1" step="0.1" value="0.3">
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>🛑 Game Flow</h4>
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        <button id="btn-reroll" class="btn-small" style="background:var(--surface2);">🎲 Reroll Question</button>
+        <button id="btn-end-early" class="btn-small btn-danger">End Game Prematurely</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h4>🏆 Leaderboard</h4>
+      <div id="sidebar-leaderboard" class="sidebar-list">
+        <!-- Populated by JS -->
+        <p style="opacity:0.5; font-size:0.8rem;">Waiting for players...</p>
+      </div>
+    </div>
+  </div>
+
   <!-- ── INITIAL CREATE ─────────────────────────────── -->
   <div id="screen-create" class="screen active">
     <div class="center-col">

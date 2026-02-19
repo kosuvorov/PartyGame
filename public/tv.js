@@ -57,13 +57,33 @@
         roundBadgeR: document.getElementById('round-badge-r'),
         roundBadgeAV: document.getElementById('round-badge-av'),
         roundBadgeAR: document.getElementById('round-badge-ar'),
+        roundBadgeAV: document.getElementById('round-badge-av'),
+        roundBadgeAR: document.getElementById('round-badge-ar'),
         confetti: document.getElementById('confetti-canvas'),
+
+        // Host controls
+        btnControlsToggle: document.getElementById('btn-controls-toggle'),
+        hostSidebar: document.getElementById('host-sidebar'),
+        btnSidebarClose: document.getElementById('btn-sidebar-close'),
+        bgMusic: document.getElementById('bg-music'),
+        btnMusicPlay: document.getElementById('btn-music-play'),
+        btnMusicPause: document.getElementById('btn-music-pause'),
+        musicVol: document.getElementById('music-vol'),
+        btnEndEarly: document.getElementById('btn-end-early'),
+        btnReroll: document.getElementById('btn-reroll'),
+        sidebarLeaderboard: document.getElementById('sidebar-leaderboard'),
     };
 
     // ── Helpers ──────────────────────────────────────────────────────
     function showScreen(name) {
         Object.values(screens).forEach(s => s?.classList.remove('active'));
         if (screens[name]) screens[name].classList.add('active');
+
+        // Show reroll button in writing and aboutyou-vote phases
+        if (refs.btnReroll) {
+            const rerollPhases = ['writing', 'aboutyouVote'];
+            refs.btnReroll.style.display = rerollPhases.includes(name) ? 'block' : 'none';
+        }
     }
 
     function roundLabel(data) {
@@ -88,6 +108,38 @@
     refs.btnNextAY.addEventListener('click', () => socket.emit('next-round'));
     refs.btnRestart.addEventListener('click', () => socket.emit('restart-game'));
 
+    // ── Host Controls ────────────────────────────────────────────────
+    refs.btnControlsToggle.addEventListener('click', () => refs.hostSidebar.classList.add('active'));
+    refs.btnSidebarClose.addEventListener('click', () => refs.hostSidebar.classList.remove('active'));
+
+    // Music
+    refs.bgMusic.volume = 0.3;
+    refs.btnMusicPlay.addEventListener('click', () => {
+        refs.bgMusic.play().catch(e => console.log('Playback prevented', e));
+        refs.btnMusicPlay.style.display = 'none';
+        refs.btnMusicPause.style.display = 'inline-block';
+    });
+    refs.btnMusicPause.addEventListener('click', () => {
+        refs.bgMusic.pause();
+        refs.btnMusicPause.style.display = 'none';
+        refs.btnMusicPlay.style.display = 'inline-block';
+    });
+    refs.musicVol.addEventListener('input', (e) => {
+        refs.bgMusic.volume = e.target.value;
+    });
+
+    // End Game Early
+    refs.btnEndEarly.addEventListener('click', () => {
+        if (confirm('End the game and show final scores?')) {
+            socket.emit('end-game-early');
+        }
+    });
+
+    // Reroll Question
+    refs.btnReroll.addEventListener('click', () => {
+        socket.emit('reroll-question');
+    });
+
     // ── Error handling ───────────────────────────────────────────────
     socket.on('error-msg', msg => alert(msg));
 
@@ -104,7 +156,26 @@
             case 'aboutyou-reveal': renderAboutYouReveal(data); break;
             case 'gameover': renderGameover(data); break;
         }
+        updateSidebarLeaderboard(data);
     });
+
+    function updateSidebarLeaderboard(data) {
+        if (!data.players) return;
+        const sorted = [...data.players].sort((a, b) => b.score - a.score);
+        refs.sidebarLeaderboard.innerHTML = '';
+        if (sorted.length === 0) {
+            refs.sidebarLeaderboard.innerHTML = '<p style="opacity:0.5; font-size:0.8rem;">Waiting for players...</p>';
+        }
+        sorted.forEach((p, i) => {
+            const div = document.createElement('div');
+            div.className = 'sidebar-list-item';
+            div.innerHTML = `
+                <span>${i + 1}. ${p.name}</span>
+                <span style="color:#4ecdc4">${p.score}</span>
+             `;
+            refs.sidebarLeaderboard.appendChild(div);
+        });
+    }
 
     // ── Renderers ────────────────────────────────────────────────────
     function renderLobby(data) {
@@ -128,6 +199,38 @@
             b.classList.toggle('active', b.dataset.mode === data.mode);
         });
 
+        // Show stats for current mode (Inject into .lobby-left below mode selector)
+        let statsEl = document.getElementById('lobby-stats');
+        if (!statsEl) {
+            const container = document.querySelector('#screen-lobby .lobby-left');
+            statsEl = document.createElement('div');
+            statsEl.id = 'lobby-stats';
+            // Insert before the start button for better layout
+            const startBtn = document.getElementById('btn-start');
+            if (container && startBtn) {
+                container.insertBefore(statsEl, startBtn);
+            } else if (container) {
+                container.appendChild(statsEl);
+            }
+        }
+
+        if (data.stats) {
+            const pct = Math.round((data.stats.used / data.stats.total) * 100) || 0;
+            statsEl.innerHTML = `
+                 <div style="background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:12px; margin:15px 0; text-align:center; border:1px solid rgba(255,255,255,0.1);">
+                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:0.85rem; opacity:0.7;">Questions Used</span>
+                        <span style="font-size:0.9rem; font-weight:bold;">${data.stats.used}/${data.stats.total}</span>
+                     </div>
+                     <div style="background:rgba(0,0,0,0.3); height:6px; border-radius:3px; overflow:hidden;">
+                         <div style="background:linear-gradient(90deg, #4ecdc4, #556270); height:100%; width:${pct}%"></div>
+                     </div>
+                 </div>
+             `;
+        } else {
+            if (statsEl) statsEl.innerHTML = '';
+        }
+
         refs.playerList.innerHTML = '';
         data.players.forEach(p => {
             const li = document.createElement('li');
@@ -135,24 +238,42 @@
         <span class="player-avatar" style="background:${p.avatar}">${p.name[0]}</span>
         <span>${p.name}</span>
         ${!p.connected ? '<span class="disconnected-tag">📴</span>' : ''}
+        <button class="btn-kick" title="Kick ${p.name}">✕</button>
       `;
+            li.querySelector('.btn-kick').addEventListener('click', () => {
+                if (confirm(`Kick ${p.name}?`)) socket.emit('kick-player', { targetName: p.name });
+            });
             refs.playerList.appendChild(li);
         });
 
         refs.btnStart.disabled = data.players.filter(p => p.connected).length < 2;
     }
 
+    // ── Helper for player chips ──────────────────────────────────────
+    function renderPlayerChips(container, players, submittedNames = [], subjectName = null) {
+        container.innerHTML = '';
+        players.forEach(p => {
+            // Skip subject in EAY if needed (though usually we want to see them just as 'done' or specific status)
+            if (subjectName && p.name === subjectName) return;
+
+            const isDone = submittedNames.includes(p.name);
+            const chip = document.createElement('div');
+            chip.className = 'player-chip ' + (isDone ? 'done' : 'pending');
+
+            // Avatar circle + Name
+            chip.innerHTML = `
+                <div class="avatar-circle" style="background:${p.avatar}">${p.name[0]}</div>
+                <span>${p.name}</span>
+                ${isDone ? '<span style="margin-left:auto">✔️</span>' : ''}
+             `;
+            container.appendChild(chip);
+        });
+    }
+
     function renderCollectEay(data) {
         showScreen('collectEay');
         refs.collectEayCount.textContent = `${data.submitted.length} / ${data.total} answered`;
-        refs.collectEayAvatars.innerHTML = '';
-        data.players.forEach(p => {
-            const dot = document.createElement('div');
-            dot.className = 'avatar-dot ' + (data.submitted.includes(p.name) ? 'done' : 'pending');
-            dot.style.background = p.avatar;
-            dot.textContent = p.name[0];
-            refs.collectEayAvatars.appendChild(dot);
-        });
+        renderPlayerChips(refs.collectEayAvatars, data.players, data.submitted);
     }
 
     function renderCategorySelect(data) {
@@ -174,26 +295,20 @@
         refs.roundBadgeW.textContent = roundLabel(data);
         refs.promptW.textContent = data.prompt;
         refs.categoryTagW.textContent = data.category || '';
+
+        let subjectName = null;
         if (data.mode === 'eay') {
+            subjectName = data.subjectName;
             refs.subjectTagW.textContent = `About ${data.subjectName}`;
             refs.subjectTagW.style.display = 'block';
         } else {
             refs.subjectTagW.style.display = 'none';
         }
+
         refs.finalBadgeW.style.display = data.isFinalRound ? 'block' : 'none';
         refs.submitCount.textContent = `${data.submitted.length} / ${data.total} submitted`;
 
-        refs.submitAvatars.innerHTML = '';
-        data.players.forEach(p => {
-            // In EAY, skip the subject in the submitted tracking bubbles if desired, or show them as distinct
-            if (data.mode === 'eay' && p.name === data.subjectName) return;
-
-            const dot = document.createElement('div');
-            dot.className = 'avatar-dot ' + (data.submitted.includes(p.name) ? 'done' : 'pending');
-            dot.style.background = p.avatar;
-            dot.textContent = p.name[0];
-            refs.submitAvatars.appendChild(dot);
-        });
+        renderPlayerChips(refs.submitAvatars, data.players, data.submitted, subjectName);
     }
 
     function renderVoting(data) {
